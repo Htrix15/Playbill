@@ -2,7 +2,7 @@
 
 namespace Playbill.Billboards.Common.Options;
 
-public abstract class PageParseOptions
+public abstract class PageParseOptions: BaseOptions
 {
     public required string ItemsContainerXPath { get; set; }
     public string? ItemsXPath { get; set; }
@@ -11,5 +11,5 @@ public abstract class PageParseOptions
     public string? EventImageXPath { get; set; }
     public string? PlaceXPath { get; set; }
     public string? LinkXPath { get; set; }
-    public required EventTypes Type { get; set; }
+    public required Dictionary<EventTypes, string?>? EventTypesXPaths { get; set; }
 }
