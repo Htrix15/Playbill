@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.Configuration;
 
-namespace Playbill.ConfigureInfrastructure;
+namespace Playbill.Infrastructure.Configure;
 
-public static class ConfigureConfigurations
+public static class Configurations
 {
     public static IConfigurationRoot Configure()
     {

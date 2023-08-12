@@ -1,12 +1,10 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Playbill.Billboards.Sample;
-using Playbill.ConfigureInfrastructure;
+using Playbill.Infrastructure.Configure;
 
-
-var services = ConfigureServices.Configure();
-var configuration = ConfigureConfigurations.Configure();
-ConfigureOptions.Configure(services, configuration);
+var services = Services.Configure();
+var configuration = Configurations.Configure();
+Options.Configure(services, configuration);
 
 using var serviceProvider = services.BuildServiceProvider();
-serviceProvider.GetService<SampleService>()?.Test();
+
 
