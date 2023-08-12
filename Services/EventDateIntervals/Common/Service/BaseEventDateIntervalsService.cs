@@ -26,7 +26,9 @@ public abstract class BaseEventDateIntervalsService : IGetEventDateIntervals, IG
     private IList<EventDateInterval> GetEventDateInterval(PresetEventDateIntervals presetEventDateInterval) => _presetEventDateIntervalsFuncMapping[presetEventDateInterval].Invoke();
     private IList<EventDateInterval> GetEventDateInterval(DateOnly startDate, DateOnly endDate) => GetByRange(startDate, endDate);
 
-    public IList<EventDateInterval> GetEventDateInterval(PresetEventDateIntervals? presetEventDateInterval, DateOnly? startDate, DateOnly? endDate)
+    public IList<EventDateInterval> GetEventDateInterval(PresetEventDateIntervals? presetEventDateInterval = null,
+        DateTime? startDate = null,
+        DateTime? endDate = null)
     {
         if (presetEventDateInterval.HasValue)
         {
@@ -34,7 +36,7 @@ public abstract class BaseEventDateIntervalsService : IGetEventDateIntervals, IG
         }
         if (startDate.HasValue && endDate.HasValue)
         {
-            return GetEventDateInterval(startDate.Value, endDate.Value);
+            return GetEventDateInterval(DateOnly.FromDateTime(startDate.Value), DateOnly.FromDateTime(endDate.Value));
         }
         throw new Exception("Invalid date options");
     }
