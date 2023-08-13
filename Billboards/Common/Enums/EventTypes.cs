@@ -6,5 +6,10 @@ public enum EventTypes
     Concert,
     Sport,
     Festival,
-    Other
+    Education,
+    Museum,
+    Show,
+    Children,
+    Tourism,
+    Other,
 }
