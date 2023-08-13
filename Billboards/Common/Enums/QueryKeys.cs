@@ -7,5 +7,7 @@ public enum QueryKeys
     Domain,
     СurrentPage,
     PageSize,
-    Other
+    Other,
+    SortMode,
+    Category
 }
