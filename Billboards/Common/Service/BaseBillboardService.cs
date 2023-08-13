@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
+using Playbill.Billboards.Common.Enums;
 using Playbill.Billboards.Common.Interfaces;
 using Playbill.Billboards.Common.Options;
 using Playbill.Common;
@@ -14,5 +15,5 @@ public abstract class BaseBillboardService: IBillboardService
     {
         _options = options.Value;
     }
-    public abstract Task<IList<Event.Event>> GetEventsAsync(EventDateInterval eventDateInterval);
+    public abstract Task<IList<Event.Event>> GetEventsAsync(IList<EventDateInterval> eventDateIntervals, IList<EventTypes>? searchEventTypes = null);
 }
