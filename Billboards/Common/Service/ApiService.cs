@@ -52,15 +52,13 @@ public abstract class ApiService<T> : BaseBillboardService
     }
 
     protected (IList<Event.Event> events, IList<Event.Event> failedEvents) ConvertToEvents<TEventTypeKey>(List<IConvertToEvent<TEventTypeKey>> responses,
-        Dictionary<TEventTypeKey, EventTypes> eventTypes, 
-        string? basePathForLink = null,
-        int timeOffset = 0)
+        BaseConvertToEventSetting convertToEventSetting)
     {
         var resultEvent = new List<Event.Event>();
         var resultFailedEvent = new List<Event.Event>();
         responses.ForEach(response =>
         {
-            var events = response.ConvertToEvents(eventTypes, basePathForLink, timeOffset);
+            var events = response.ConvertToEvents(convertToEventSetting);
             resultEvent.AddRange(events.events);
             resultFailedEvent.AddRange(events.failedEvents);
         });
