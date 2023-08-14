@@ -9,9 +9,9 @@ public class Response: IConvertToEvent<int>
     public required PaginationOptions Pagination { get; set; }
     public required List<Item> Items { get; set; }
 
-    public (IList<Event> events, IList<Event> failedEvents) ConvertToEvents(Dictionary<int, EventTypes> eventTypes, string basePathForLink = "",
-        int timeOffset = 0)
+    public (IList<Event> events, IList<Event> failedEvents) ConvertToEvents(BaseConvertToEventSetting convertToEventSetting)
     {
+        var setting = convertToEventSetting as ConvertToEventSetting;
         if (!Items.Any()) return (new List<Event>(), new List<Event>());
 
         var resultEvent = new List<Event>();
@@ -20,60 +20,53 @@ public class Response: IConvertToEvent<int>
         {
             try
             {
-                var eventType = eventTypes[(item.Object?.Category?.Id ?? item.Object?.Activity?.Category?.Id)!.Value];
-                var date = (item.Object?.BeginsAt ?? item.Object?.DateRange?.BeginsAt)!.Value.AddHours(timeOffset);
-                var place = item.Object?.Venues?.FirstOrDefault()?.Name ?? item.Object?.Hall?.Venue?.Name;
+                var eventType = EventTypes.FailedEvent;
+                var categoryId = (item.Object?.Category?.Id ?? item.Object?.Activity?.Category?.Id);
+                if (categoryId != null && (setting?.EventTypes.TryGetValue(categoryId.Value, out var newEventType) ?? false))
+                {
+                    eventType = newEventType;
+                }
 
-                resultEvent.Add(new Event()
+                var date = (item.Object?.BeginsAt ?? item.Object?.DateRange?.BeginsAt)?.AddHours(setting?.TimeOffset ?? 0);
+                var place = item.Object?.Venues?.FirstOrDefault()?.Name ?? item.Object?.Hall?.Venue?.Name;
+                var title = item.Object?.Title;
+                var imagePath = item.Object?.PosterImage;
+                var path = item.Object?.UrlSlug is not null ? setting?.BasePathForLink + "/" + item.Object.UrlSlug : null;
+
+                if (date is null || place is null || title is null || imagePath is null || path is null)
+                {
+                    eventType = EventTypes.FailedEvent;
+                }
+
+                var @event = new Event()
                 {
                     Billboard = Playbill.Common.BillboardTypes.Kassir,
                     Type = eventType,
                     Date = date,
-                    Title = item.Object!.Title!,
-                    ImagePath = item.Object.PosterImage!,
-                    Place = place!,
+                    Title = title,
+                    ImagePath = imagePath,
+                    Place = place,
                     Links = new List<EventLink>()
+                    {
+                        new EventLink()
                         {
-                            new EventLink()
-                            {
-                                BillboardType = Playbill.Common.BillboardTypes.Kassir,
-                                Path = basePathForLink + "/" + item.Object.UrlSlug
-                            }
+                            BillboardType = Playbill.Common.BillboardTypes.Kassir,
+                            Path = path
                         }
+                    }
+                };
+                if (@event.Type != EventTypes.FailedEvent)
+                {
+                    resultEvent.Add(@event);
+                } else
+                {
+                    resultFailedEvent.Add(@event);
                 }
-                );
+              
             }
             catch (Exception exception)
             {
                 Console.WriteLine($"Fail convert: {item.Object?.Title ?? "?"} Message : {exception.Message}");
-
-                var eventType = EventTypes.FailedEvent;
-                var categoryId = (item.Object?.Category?.Id ?? item.Object?.Activity?.Category?.Id);
-                if (categoryId != null && eventTypes.TryGetValue(categoryId.Value, out var newEventType))
-                {
-                    eventType = newEventType;
-                }
-               
-                var date = (item.Object?.BeginsAt ?? item.Object?.DateRange?.BeginsAt)?.AddHours(timeOffset) ?? DateTime.Now.AddHours(1);
-                var place = item.Object?.Venues?.FirstOrDefault()?.Name ?? item.Object?.Hall?.Venue?.Name ?? "?";
-
-                resultFailedEvent.Add(new Event()
-                {
-                    Billboard = Playbill.Common.BillboardTypes.Kassir,
-                    Type = eventType,
-                    Date = date,
-                    Title = item.Object?.Title ?? "?",
-                    ImagePath = item.Object?.PosterImage ?? "?",
-                    Place = place!,
-                    Links = new List<EventLink>()
-                        {
-                            new EventLink()
-                            {
-                                BillboardType = Playbill.Common.BillboardTypes.Kassir,
-                                Path = item.Object?.UrlSlug is not null ? basePathForLink + "/" + item.Object.UrlSlug : "?"
-                            }
-                        }
-                });
             }
         }
         return (resultEvent, resultFailedEvent);

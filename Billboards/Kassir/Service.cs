@@ -49,7 +49,13 @@ public class Service : ApiService<int>
         var responsesJsons = await CallRequestsAsync(requests);
         var responses = responsesJsons.ParseJsons<Response>();
         var eventTypes = options.EventKeys.Flip();
-        var events = ConvertToEvents(responses.ToList<IConvertToEvent<int>>(), eventTypes, options.QueryKeysConstants[QueryKeys.Domain], options.TimeOffset);
+        var convertToEventSetting = new ConvertToEventSetting()
+        {
+            EventTypes = eventTypes,
+            BasePathForLink = options.QueryKeysConstants[QueryKeys.Domain],
+            TimeOffset = options.TimeOffset
+        };
+        var events = ConvertToEvents(responses.ToList<IConvertToEvent<int>>(), convertToEventSetting);
         var validEvents = FilterEvents(events.events);
         var validFailedEvents = FilterEvents(events.failedEvents);
         return (validEvents, validFailedEvents);
