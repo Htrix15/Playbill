@@ -1,9 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
-using Playbill.Billboards.Common.Enums;
 using Playbill.Billboards.Common.Event;
 using Playbill.Billboards.Common.Interfaces;
 using Playbill.Billboards.Common.Options;
-using Playbill.Billboards.Kassir;
 using System.Collections.Concurrent;
 
 namespace Playbill.Billboards.Common.Service;
