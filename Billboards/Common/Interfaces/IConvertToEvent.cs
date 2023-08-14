@@ -1,10 +1,8 @@
-﻿using Playbill.Billboards.Common.Enums;
+﻿using Playbill.Billboards.Common.Event;
 
 namespace Playbill.Billboards.Common.Interfaces;
 
 public interface IConvertToEvent<TEventTypeKey>
 {
-    (IList<Event.Event> events, IList<Event.Event> failedEvents) ConvertToEvents(Dictionary<TEventTypeKey, EventTypes> eventTypes,
-        string? basePathForLink = null,
-        int timeOffset = 0);
+    (IList<Event.Event> events, IList<Event.Event> failedEvents) ConvertToEvents(BaseConvertToEventSetting setting);
 }

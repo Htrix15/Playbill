@@ -21,11 +21,11 @@ public abstract class BaseBillboardService: IBillboardService
         events.Where(@event =>
         {
             var validPlace = !(_options.ExcludePlacesNames?.Contains(@event.Place, StringComparer.CurrentCultureIgnoreCase) ?? true);
-            var validTime = @event.Date > DateTime.Now;
+            var validTime = (@event.Date ?? DateTime.Now.AddMinutes(1)) > DateTime.Now;
             var validName = true;
             if (_options.ExcludeEventsNames?.TryGetValue(@event.Type, out var excludeNames) ?? false)
             {
-                validName = excludeNames.Any(name => @event.Title.Contains(name));
+                validName = excludeNames.Any(name => @event.Title?.Contains(name) ?? true);
             }
             return validPlace && validName && validTime;
         }).ToList();
