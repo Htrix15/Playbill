@@ -12,5 +12,5 @@ public enum EventTypes
     Children,
     Tourism,
     Other,
-    FailedEvent
+    Unidentified
 }

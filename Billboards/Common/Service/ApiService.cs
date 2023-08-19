@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
+using Playbill.Billboards.Common.Enums;
 using Playbill.Billboards.Common.Event;
+using Playbill.Billboards.Common.Extension;
 using Playbill.Billboards.Common.Interfaces;
 using Playbill.Billboards.Common.Options;
 using System.Collections.Concurrent;
@@ -9,6 +11,33 @@ namespace Playbill.Billboards.Common.Service;
 public abstract class ApiService<T> : BaseBillboardService
 {
     protected ApiService(IOptions<ApiOptions<T>> options) : base(options) { }
+
+    protected List<KeyValuePair<EventTypes, HashSet<TEventKey>>> EventKeys<TEventKey>(IList<EventTypes>? searchEventTypes) =>
+        (_options as ApiOptions<TEventKey>)?.EventKeys?.FilterEventKeys(searchEventTypes).ToList() ?? new List<KeyValuePair<EventTypes, HashSet<TEventKey>>>();
+   
+    protected async Task<string?> CallRequestAsync(string request)
+    {
+        var httpClient = new HttpClient();
+        var attempt = _options.TryCount;
+        do
+        {
+            try
+            {
+                using var response = await httpClient.GetAsync(request);
+                response.EnsureSuccessStatusCode();
+                return await response.Content.ReadAsStringAsync();
+            }
+            catch (Exception exception)
+            {
+                attempt--;
+                Console.WriteLine($"Fail call: {request} Remaining attempts: {attempt} Message : {exception.Message}");
+                await Task.Delay(_options.TimeOut);
+            }
+        }
+        while (attempt > 0);
+
+        return null;
+    }
 
     protected async Task<IList<string>> CallRequestsAsync(IList<string> requests)
     {
@@ -49,18 +78,16 @@ public abstract class ApiService<T> : BaseBillboardService
         return responsesBug.ToList();
     }
 
-    protected (IList<Event.Event> events, IList<Event.Event> failedEvents) ConvertToEvents<TEventTypeKey>(List<IConvertToEvent<TEventTypeKey>> responses,
+    protected IList<Event.Event> ConvertToEvents<TEventTypeKey>(List<IConvertToEvent<TEventTypeKey>> responses,
         BaseConvertToEventSetting convertToEventSetting)
     {
         var resultEvent = new List<Event.Event>();
-        var resultFailedEvent = new List<Event.Event>();
         responses.ForEach(response =>
         {
             var events = response.ConvertToEvents(convertToEventSetting);
-            resultEvent.AddRange(events.events);
-            resultFailedEvent.AddRange(events.failedEvents);
+            resultEvent.AddRange(events);
         });
 
-        return (resultEvent, resultFailedEvent);
+        return resultEvent;
     }
 }
