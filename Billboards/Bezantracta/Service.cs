@@ -19,59 +19,59 @@ public class Service : PageParseService
     {
         var options = (_options as Options);
 
-        var filteredEventKeys = searchEventTypes is null
-            ? options.EventKeys
-            : options.EventKeys.Where(eventKey => searchEventTypes.Contains(eventKey.Key));
+        var filteredEventKeys = EventKeys(searchEventTypes);
 
         var baseSearchUrl = options.BaseSearchUrl;
         var baseLinkUrl = options.BaseLinkUrl;
 
         var result = new List<Event>();
 
-        foreach (var eventKey in filteredEventKeys)
+        foreach (var eventKeys in filteredEventKeys)
         {
-            try
+            foreach (var eventKey in eventKeys.Value)
             {
-                var web = new HtmlWeb();
-                var doc = await web.LoadFromWebAsync(baseSearchUrl + eventKey.Value);
-
-                var fullAfisha = doc.DocumentNode.SelectSingleNode(options.ItemsContainerXPath);
-                var afishaItems = fullAfisha.SelectNodes(options.ItemsXPath);
-                foreach (var afishaItem in afishaItems)
+                try
                 {
-                    try
+                    var web = new HtmlWeb();
+                    var doc = await web.LoadFromWebAsync(baseSearchUrl + eventKey);
+
+                    var fullAfisha = doc.DocumentNode.SelectSingleNode(options.ItemsContainerXPath);
+                    var afishaItems = fullAfisha.SelectNodes(options.ItemsXPath);
+                    foreach (var afishaItem in afishaItems)
                     {
-                        var dateItem = afishaItem.SelectSingleNode(options.EventDateXPath);
-                        var date = DateTime.ParseExact(dateItem.InnerText.Trim(), "dd MMMM HH:mm", CultureInfo.CurrentCulture);
-                        var chackDate = new DateOnly(date.Year, date.Month, date.Day);
-
-                        if (!eventDateIntervals.Any(eventDateInterval => chackDate >= eventDateInterval.StartDate && chackDate <= eventDateInterval.EndDate))
+                        try
                         {
-                            continue;
-                        }
+                            var dateItem = afishaItem.SelectSingleNode(options.EventDateXPath);
+                            var date = DateTime.ParseExact(dateItem.InnerText.Trim(), "dd MMMM HH:mm", CultureInfo.CurrentCulture);
+                            var chackDate = new DateOnly(date.Year, date.Month, date.Day);
 
-                        var eventType = eventKey.Key;
+                            if (!eventDateIntervals.Any(eventDateInterval => chackDate >= eventDateInterval.StartDate && chackDate <= eventDateInterval.EndDate))
+                            {
+                                continue;
+                            }
 
-                        var nameItem = afishaItem.SelectSingleNode(options.EventTitleXPath);
-                        var title = nameItem.InnerText.Trim().Replace("&quot;", "\"");
+                            var eventType = eventKeys.Key;
 
-                        var placeItem = afishaItem.SelectSingleNode(options.PlaceXPath);
-                        var place = placeItem.InnerText.Trim();
+                            var nameItem = afishaItem.SelectSingleNode(options.EventTitleXPath);
+                            var title = nameItem.InnerText.Trim().Replace("&quot;", "\"");
 
-                        var imageItem = afishaItem.SelectSingleNode(options.EventImageXPath);
-                        var imagePath = baseLinkUrl + imageItem.Attributes["src"].Value;
+                            var placeItem = afishaItem.SelectSingleNode(options.PlaceXPath);
+                            var place = placeItem.InnerText.Trim();
 
-                        var linkItem = afishaItem.SelectSingleNode(options.LinkXPath);
-                        var link = baseLinkUrl + linkItem.Attributes["href"].Value;
-                        result.Add(new Event()
-                        {
-                            Billboard = BillboardType,
-                            Type = eventType,
-                            Dates = new List<DateTime>() { date },
-                            Title = title,
-                            ImagePath = imagePath,
-                            Place = place,
-                            Links = new List<EventLink>()
+                            var imageItem = afishaItem.SelectSingleNode(options.EventImageXPath);
+                            var imagePath = baseLinkUrl + imageItem.Attributes["src"].Value;
+
+                            var linkItem = afishaItem.SelectSingleNode(options.LinkXPath);
+                            var link = baseLinkUrl + linkItem.Attributes["href"].Value;
+                            result.Add(new Event()
+                            {
+                                Billboard = BillboardType,
+                                Type = eventType,
+                                Dates = new List<DateTime>() { date },
+                                Title = title,
+                                ImagePath = imagePath,
+                                Place = place,
+                                Links = new List<EventLink>()
                             {
                                 new EventLink()
                                 {
@@ -79,17 +79,18 @@ public class Service : PageParseService
                                     Path = link
                                 }
                             }
-                        });
-                    }
-                    catch (Exception exception)
-                    {
-                        Console.WriteLine($"Fail parse items :{exception.Message} ");
+                            });
+                        }
+                        catch (Exception exception)
+                        {
+                            Console.WriteLine($"Fail parse items :{exception.Message} ");
+                        }
                     }
                 }
-            }
-            catch (Exception exception)
-            {
-                Console.WriteLine($"Fail parse page :{exception.Message} ");
+                catch (Exception exception)
+                {
+                    Console.WriteLine($"Fail parse page :{exception.Message} ");
+                }
             }
         }
 
