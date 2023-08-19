@@ -8,12 +8,12 @@ public class Response : IConvertToEvent<string>
     public PaginationOptions Paging { get; set; }
     public List<Datum> Data { get; set; }
 
-    public IList<Common.Event.Event> ConvertToEvents(BaseConvertToEventSetting convertToEventSetting)
+    public IList<Event> ConvertToEvents(BaseConvertToEventSetting convertToEventSetting)
     {
         var setting = convertToEventSetting as ConvertToEventSetting;
-        if (!Data.Any()) return new List<Common.Event.Event>();
+        if (!Data.Any()) return new List<Event>();
 
-        var resultEvent = new List<Common.Event.Event>();
+        var resultEvent = new List<Event>();
         foreach (var item in Data)
         {
             try
@@ -36,7 +36,7 @@ public class Response : IConvertToEvent<string>
                 var place = item.ScheduleInfo.PlacePreview;
                 var link = setting.BaseLinkUrl + item.@Event.Url;
 
-                var @event = new Common.Event.Event()
+                var @event = new Event()
                 {
                     Billboard = Playbill.Common.BillboardTypes.Ya,
                     Type = eventType,
@@ -91,11 +91,11 @@ public class Response : IConvertToEvent<string>
         public object distance { get; set; }
         public bool isPersonal { get; set; }
         public int commentsCount { get; set; }
-        public Event @Event { get; set; }
+        public EventYa @Event { get; set; }
         public ScheduleInfo ScheduleInfo { get; set; }
     }
 
-    public class Event
+    public class EventYa
     {
         public string Id { get; set; }
         public string Url { get; set; }
