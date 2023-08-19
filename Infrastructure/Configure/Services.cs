@@ -13,6 +13,7 @@ public static class Services
             .AddTransient<IBillboardService, Billboards.Kassir.Service>()
             .AddTransient<IBillboardService, Billboards.Ya.Service>()
             .AddTransient<IBillboardService, Billboards.Bezantracta.Service>()
+            .AddTransient<IBillboardService, Billboards.Quickticket.Service>()
             ;
     }
 }

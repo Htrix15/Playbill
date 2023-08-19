@@ -5,15 +5,16 @@ using Playbill.Billboards.Common.Event;
 using Playbill.Billboards.Common.Extension;
 using Playbill.Billboards.Common.Service;
 using Playbill.Common;
+using System;
 using System.Globalization;
 
-namespace Playbill.Billboards.Bezantracta;
+namespace Playbill.Billboards.Quickticket;
 
 public class Service : PageParseService
 {
-    public Service(IOptions<Options> options) : base(options) {}
+    public Service(IOptions<Options> options) : base(options){}
 
-    public override BillboardTypes BillboardType => BillboardTypes.Bezantracta;
+    public override BillboardTypes BillboardType => BillboardTypes.Quickticket;
 
     public override async Task<IList<Event>> GetEventsAsync(IList<EventDateInterval> eventDateIntervals, IList<EventTypes>? searchEventTypes = null)
     {
@@ -34,32 +35,41 @@ public class Service : PageParseService
                 {
                     var web = new HtmlWeb();
                     var doc = await web.LoadFromWebAsync(baseSearchUrl + eventKey);
-
+                    var placeItem = doc.DocumentNode.SelectSingleNode(options.PlaceXPath);
+                    var place = placeItem.InnerText.Trim();
                     var fullAfisha = doc.DocumentNode.SelectSingleNode(options.ItemsContainerXPath);
                     var afishaItems = fullAfisha.SelectNodes(options.ItemsXPath);
                     foreach (var afishaItem in afishaItems)
                     {
                         try
                         {
-                            var dateItem = afishaItem.SelectSingleNode(options.EventDateXPath);
-                            var date = DateTime.ParseExact(dateItem.InnerText.Trim(), options.DateFormat, CultureInfo.CurrentCulture);
-                            var chackDate = new DateOnly(date.Year, date.Month, date.Day);
+                            var dates = new List<DateTime>();
 
-                            if (!eventDateIntervals.Any(eventDateInterval => chackDate >= eventDateInterval.StartDate && chackDate <= eventDateInterval.EndDate))
+                            var dateContainers = afishaItem.SelectNodes(options.DatesXPath);
+                            foreach (var dateContainer in dateContainers)
                             {
-                                continue;
+                                var dateItems = dateContainer.SelectNodes(options.EventDateXPath);
+                                if (dateItems == null) { continue; }
+                                foreach (var dateItem in dateItems)
+                                {
+                                    if (dateItem == null) { continue; }
+                                    var date = DateTime.ParseExact(dateItem.InnerText.Trim(), options.DateFormat, CultureInfo.CurrentCulture);
+                                    var chackDate = new DateOnly(date.Year, date.Month, date.Day);
+                                    if (eventDateIntervals.Any(eventDateInterval => chackDate >= eventDateInterval.StartDate && chackDate <= eventDateInterval.EndDate))
+                                    {
+                                        dates.Add(date);
+                                    }
+                                }
                             }
-
-                            var eventType = eventKeys.Key;
+                            if (!dates.Any()) { continue; }
 
                             var nameItem = afishaItem.SelectSingleNode(options.EventTitleXPath);
                             var title = nameItem.InnerText.Trim().Replace("&quot;", "\"");
 
-                            var placeItem = afishaItem.SelectSingleNode(options.PlaceXPath);
-                            var place = placeItem.InnerText.Trim();
+                            var eventType = eventKeys.Key;
 
                             var imageItem = afishaItem.SelectSingleNode(options.EventImageXPath);
-                            var imagePath = baseLinkUrl + imageItem.Attributes["src"].Value;
+                            var imagePath = imageItem.Attributes["src"].Value;
 
                             var linkItem = afishaItem.SelectSingleNode(options.LinkXPath);
                             var link = baseLinkUrl + linkItem.Attributes["href"].Value;
@@ -67,7 +77,7 @@ public class Service : PageParseService
                             {
                                 Billboard = BillboardType,
                                 Type = eventType,
-                                Dates = new List<DateTime>() { date },
+                                Dates = dates,
                                 Title = title,
                                 ImagePath = imagePath,
                                 Place = place,
@@ -93,7 +103,6 @@ public class Service : PageParseService
                 }
             }
         }
-
 
         result = result.DateGrouping().ToList();
         return result;
