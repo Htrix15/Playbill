@@ -5,7 +5,7 @@ public enum QueryKeys
     DateFrom,
     DateEnd,
     Domain,
-    СurrentPage,
+    CurrentPage,
     PageSize,
     Other,
     SortMode,
