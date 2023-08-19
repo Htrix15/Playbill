@@ -9,6 +9,6 @@ public static class Options
     public static void Configure(IServiceCollection services, IConfigurationRoot configuration)
     {
         services.Configure<SupportedBillboardTypesOptions>(configuration.GetSection("Billboards"));
-
+        services.Configure<Billboards.Kassir.Options>(configuration.GetSection("Kassir"));
     }
 }
