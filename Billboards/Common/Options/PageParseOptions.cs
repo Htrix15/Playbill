@@ -11,5 +11,5 @@ public abstract class PageParseOptions: BaseOptions
     public string? EventImageXPath { get; set; }
     public string? PlaceXPath { get; set; }
     public string? LinkXPath { get; set; }
-    public required Dictionary<EventTypes, string?>? EventKeys { get; set; }
+    public required Dictionary<EventTypes, HashSet<string>>? EventKeys { get; set; }
 }
