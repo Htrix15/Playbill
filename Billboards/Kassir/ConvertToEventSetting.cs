@@ -5,7 +5,8 @@ namespace Playbill.Billboards.Kassir;
 
 public class ConvertToEventSetting : BaseConvertToEventSetting
 {
-    public Dictionary<int, EventTypes> EventTypes { get; set; }
-    public string? BasePathForLink { get; set; }
-    public int TimeOffset { get; set; } = 0;
+    public required Dictionary<int, EventTypes> EventTypes { get; set; }
+    public required string? BasePathForLink { get; set; }
+    public required int TimeOffset { get; set; } = 0;
+    public DateOnly EstimatedDate { get; set; }
 }

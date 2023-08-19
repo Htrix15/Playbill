@@ -9,40 +9,54 @@ public class Response: IConvertToEvent<int>
     public required PaginationOptions Pagination { get; set; }
     public required List<Item> Items { get; set; }
 
-    public (IList<Event> events, IList<Event> failedEvents) ConvertToEvents(BaseConvertToEventSetting convertToEventSetting)
+    public IList<Event> ConvertToEvents(BaseConvertToEventSetting convertToEventSetting)
     {
         var setting = convertToEventSetting as ConvertToEventSetting;
-        if (!Items.Any()) return (new List<Event>(), new List<Event>());
+        if (!Items.Any()) return new List<Event>();
 
         var resultEvent = new List<Event>();
-        var resultFailedEvent = new List<Event>();
         foreach (var item in Items)
         {
             try
             {
-                var eventType = EventTypes.FailedEvent;
+                var estimateDate = false;
+                var eventType = EventTypes.Unidentified;
                 var categoryId = (item.Object?.Category?.Id ?? item.Object?.Activity?.Category?.Id);
                 if (categoryId != null && (setting?.EventTypes.TryGetValue(categoryId.Value, out var newEventType) ?? false))
                 {
                     eventType = newEventType;
                 }
+                var date = item.Object?.BeginsAt?.AddHours(setting?.TimeOffset ?? 0);
 
-                var date = (item.Object?.BeginsAt ?? item.Object?.DateRange?.BeginsAt)?.AddHours(setting?.TimeOffset ?? 0);
+                if (!date.HasValue && item.Object?.DateRange != null)
+                {
+                    var estimatedDate = new DateTime(setting.EstimatedDate.Year, setting.EstimatedDate.Month, setting.EstimatedDate.Day); 
+
+                    if (item.Object?.DateRange.BeginsAt.Value.Date == estimatedDate)
+                    {
+                        date = item.Object?.DateRange.BeginsAt.Value.AddHours(setting?.TimeOffset ?? 0);
+                    }
+                    else if (item.Object?.DateRange.EndsAt.Value.Date == estimatedDate)
+                    {
+                        date = item.Object?.DateRange.EndsAt.Value.AddHours(setting?.TimeOffset ?? 0);
+                    } else
+                    {
+                        date = estimatedDate;
+                        estimateDate = true;
+                    }
+                }
+               
                 var place = item.Object?.Venues?.FirstOrDefault()?.Name ?? item.Object?.Hall?.Venue?.Name;
                 var title = item.Object?.Title;
                 var imagePath = item.Object?.PosterImage;
                 var path = item.Object?.UrlSlug is not null ? setting?.BasePathForLink + "/" + item.Object.UrlSlug : null;
 
-                if (date is null || place is null || title is null || imagePath is null || path is null)
-                {
-                    eventType = EventTypes.FailedEvent;
-                }
-
                 var @event = new Event()
                 {
                     Billboard = Playbill.Common.BillboardTypes.Kassir,
                     Type = eventType,
-                    Date = date,
+                    Dates = !estimateDate && date.HasValue ? new List<DateTime>() { date.Value } : null,
+                    EstimatedDates = estimateDate ? new List<DateOnly>() { setting.EstimatedDate } : null,
                     Title = title,
                     ImagePath = imagePath,
                     Place = place,
@@ -55,21 +69,14 @@ public class Response: IConvertToEvent<int>
                         }
                     }
                 };
-                if (@event.Type != EventTypes.FailedEvent)
-                {
-                    resultEvent.Add(@event);
-                } else
-                {
-                    resultFailedEvent.Add(@event);
-                }
-              
+                resultEvent.Add(@event);
             }
             catch (Exception exception)
             {
                 Console.WriteLine($"Fail convert: {item.Object?.Title ?? "?"} Message : {exception.Message}");
             }
         }
-        return (resultEvent, resultFailedEvent);
+        return resultEvent;
     }
 
     public class Activity

@@ -2,7 +2,6 @@
 using Playbill.Billboards.Common.Enums;
 using Playbill.Billboards.Common.Event;
 using Playbill.Billboards.Common.Extension;
-using Playbill.Billboards.Common.Interfaces;
 using Playbill.Billboards.Common.Service;
 using Playbill.Common;
 
@@ -14,40 +13,30 @@ public class Service : ApiService<int>
 
     public override BillboardTypes BillboardType => BillboardTypes.Kassir;
 
-    private IList<string> CreateRequest(IList<EventDateInterval> eventDateIntervals, IList<EventTypes>? searchEventTypes = null)
+    private string CreateRequest(DateOnly searchDate, int categoryId)
     {
         var options = (_options as Options);
-        var requests = new List<string>();
-        options?.EventKeys?.FilterEventKeys(searchEventTypes).ToList().ForEach(eventKey => {
-            eventDateIntervals.ToList().ForEach(eventDateInterval =>
-            {
-                eventKey.Value.ToList().ForEach(categoryId =>
-                {
-                    var request = options.BaseUrl;
-                    var keys = new List<string>()
-                    {
-                        $"{options.QueryKeys?[QueryKeys.СurrentPage]}={options.QueryKeysConstants?[QueryKeys.СurrentPage]}",
-                        $"{options.QueryKeys?[QueryKeys.PageSize]}={options.QueryKeysConstants?[QueryKeys.PageSize]}",
-                        $"{options.QueryKeys?[QueryKeys.Category]}={categoryId}",
-                        $"{options.QueryKeys?[QueryKeys.DateFrom]}={eventDateInterval.StartDate.ToString(options.DateFormat)}",
-                        $"{options.QueryKeys?[QueryKeys.DateEnd]}={eventDateInterval.EndDate.ToString(options.DateFormat)}",
-                        $"{options.QueryKeys?[QueryKeys.SortMode]}={options.QueryKeysConstants?[QueryKeys.SortMode]}",
-                        $"{options.QueryKeys?[QueryKeys.Domain]}={options.QueryKeysConstants?[QueryKeys.Domain]}",
-                    };
-                    request += string.Join('&', keys);
-                    requests.Add(request);
-                });
-            });
-        });
-        return requests;
+
+        var keys = new List<string>()
+        {
+            $"{options.QueryKeys?[QueryKeys.СurrentPage]}={options.QueryKeysConstants?[QueryKeys.СurrentPage]}",
+            $"{options.QueryKeys?[QueryKeys.PageSize]}={options.QueryKeysConstants?[QueryKeys.PageSize]}",
+            $"{options.QueryKeys?[QueryKeys.Category]}={categoryId}",
+            $"{options.QueryKeys?[QueryKeys.DateFrom]}={searchDate.ToString(options.DateFormat)}",
+            $"{options.QueryKeys?[QueryKeys.DateEnd]}={searchDate.ToString(options.DateFormat)}",
+            $"{options.QueryKeys?[QueryKeys.SortMode]}={options.QueryKeysConstants?[QueryKeys.SortMode]}",
+            $"{options.QueryKeys?[QueryKeys.Domain]}={options.QueryKeysConstants?[QueryKeys.Domain]}",
+        };
+
+        return options.BaseUrl + string.Join('&', keys);
     }
 
-    public override async Task<(IList<Event>, IList<Event>)> GetEventsAsync(IList<EventDateInterval> eventDateIntervals, IList<EventTypes>? searchEventTypes = null)
+    public override async Task<IList<Event>> GetEventsAsync(IList<EventDateInterval> eventDateIntervals, IList<EventTypes>? searchEventTypes = null)
     {
+        var result = new List<Event>();
+
         var options = (_options as Options);
-        var requests = CreateRequest(eventDateIntervals, searchEventTypes);
-        var responsesJsons = await CallRequestsAsync(requests);
-        var responses = responsesJsons.ParseJsons<Response>();
+
         var eventTypes = options.EventKeys.Flip();
         var convertToEventSetting = new ConvertToEventSetting()
         {
@@ -55,11 +44,34 @@ public class Service : ApiService<int>
             BasePathForLink = options.QueryKeysConstants[QueryKeys.Domain],
             TimeOffset = options.TimeOffset
         };
-        var events = ConvertToEvents(responses.ToList<IConvertToEvent<int>>(), convertToEventSetting);
-        var validEvents = FilterEvents(events.events);
-        var validFailedEvents = FilterEvents(events.failedEvents);
-        return (validEvents, validFailedEvents);
+        var filteredEventKeys = EventKeys<int>(searchEventTypes);
+
+        foreach (var eventKey in filteredEventKeys)
+        {
+            foreach(var eventDateInterval in eventDateIntervals)
+            {
+                foreach(var categoryId in eventKey.Value)
+                {
+                    var searchDate = eventDateInterval.StartDate;
+                    do
+                    {
+                        var request = CreateRequest(searchDate, categoryId);
+                        var responseJson = await CallRequestAsync(request);
+                        if (responseJson != null)
+                        {
+                            var respons = responseJson.ParseJson<Response>();
+                            convertToEventSetting.EstimatedDate = searchDate;
+                            var events = respons.ConvertToEvents(convertToEventSetting);
+                            result.AddRange(FilterEvents(events));
+                        }
+                        searchDate = searchDate.AddDays(1);
+                    } while (searchDate <= eventDateInterval.EndDate);
+                }
+            }
+        }
+
+        result = result.DateGrouping().ToList();
+
+        return result;
     }
-
-
 }
