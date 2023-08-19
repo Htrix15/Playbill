@@ -11,6 +11,7 @@ public static class Services
         return new ServiceCollection()
             .AddTransient<EventDateIntervalsService>()
             .AddTransient<IBillboardService, Billboards.Kassir.Service>()
+            .AddTransient<IBillboardService, Billboards.Ya.Service>()
             ;
     }
 }

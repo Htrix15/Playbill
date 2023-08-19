@@ -10,5 +10,6 @@ public static class Options
     {
         services.Configure<SupportedBillboardTypesOptions>(configuration.GetSection("Billboards"));
         services.Configure<Billboards.Kassir.Options>(configuration.GetSection("Kassir"));
+        services.Configure<Billboards.Ya.Options>(configuration.GetSection("Ya"));
     }
 }
