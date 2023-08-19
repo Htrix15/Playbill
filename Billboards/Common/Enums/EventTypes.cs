@@ -12,5 +12,7 @@ public enum EventTypes
     Children,
     Tourism,
     Other,
-    Unidentified
+    Unidentified,
+    Quests,
+    MasterСlasses
 }

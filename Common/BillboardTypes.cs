@@ -2,5 +2,6 @@
 
 public enum BillboardTypes
 {
-   Kassir = 0
+   Kassir = 0,
+   Ya = 1,
 }

@@ -20,7 +20,7 @@ public abstract class BaseBillboardService: IBillboardService
     protected IList<Event.Event> FilterEvents(IList<Event.Event> events) =>
         events.Where(@event =>
         {
-            var validPlace = !(_options.ExcludePlacesNames?.Contains(@event.Place, StringComparer.CurrentCultureIgnoreCase) ?? true);
+            var validPlace = (!(_options.ExcludePlacesNames?.Contains(@event.Place, StringComparer.CurrentCultureIgnoreCase)) ?? true);
             var validTime = @event.Dates is null || @event.Dates.First() > DateTime.Now;
             var validName = true;
             if (_options.ExcludeEventsNames?.TryGetValue(@event.Type, out var excludeNames) ?? false)

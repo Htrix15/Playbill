@@ -13,8 +13,8 @@ public static class EventGroupingExtension
             {
                 Billboard = generalData.Billboard,
                 Type = generalData.Type,
-                Dates = mainDate.Where(@event => @event.Dates != null).SelectMany(date => date.Dates)?.ToList(),
-                EstimatedDates = mainDate.Where(@event => @event.EstimatedDates != null).SelectMany(date => date.EstimatedDates)?.ToList(),
+                Dates = mainDate.Where(@event => @event.Dates != null).SelectMany(date => date.Dates)?.Distinct().ToList(),
+                EstimatedDates = mainDate.Where(@event => @event.EstimatedDates != null).SelectMany(date => date.EstimatedDates)?.Distinct().ToList(),
                 Title = generalData.Title,
                 ImagePath = generalData.ImagePath,
                 Place = generalData.Place,
