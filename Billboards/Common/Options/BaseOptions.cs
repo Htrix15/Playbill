@@ -4,7 +4,8 @@ namespace Playbill.Billboards.Common.Options;
 
 public abstract class BaseOptions
 {
-    public required string BaseUrl { get; set; }
+    public required string BaseSearchUrl { get; set; }
+    public required string BaseLinkUrl { get; set; }
     public required int MaxDegreeOfParallelism { get; set; }
     /// <summary>
     /// In case of an error, stop requests for this time

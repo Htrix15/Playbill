@@ -19,7 +19,7 @@ public class Service : ApiService<int>
 
         var keys = new List<string>()
         {
-            $"{options.QueryKeys?[QueryKeys.СurrentPage]}={options.QueryKeysConstants?[QueryKeys.СurrentPage]}",
+            $"{options.QueryKeys?[QueryKeys.CurrentPage]}={options.QueryKeysConstants?[QueryKeys.CurrentPage]}",
             $"{options.QueryKeys?[QueryKeys.PageSize]}={options.QueryKeysConstants?[QueryKeys.PageSize]}",
             $"{options.QueryKeys?[QueryKeys.Category]}={categoryId}",
             $"{options.QueryKeys?[QueryKeys.DateFrom]}={searchDate.ToString(options.DateFormat)}",
@@ -28,7 +28,7 @@ public class Service : ApiService<int>
             $"{options.QueryKeys?[QueryKeys.Domain]}={options.QueryKeysConstants?[QueryKeys.Domain]}",
         };
 
-        return options.BaseUrl + string.Join('&', keys);
+        return options.BaseSearchUrl + string.Join('&', keys);
     }
 
     public override async Task<IList<Event>> GetEventsAsync(IList<EventDateInterval> eventDateIntervals, IList<EventTypes>? searchEventTypes = null)
@@ -41,7 +41,7 @@ public class Service : ApiService<int>
         var convertToEventSetting = new ConvertToEventSetting()
         {
             EventTypes = eventTypes,
-            BasePathForLink = options.QueryKeysConstants[QueryKeys.Domain],
+            BasePathForLink = options.BaseLinkUrl,
             TimeOffset = options.TimeOffset
         };
         var filteredEventKeys = EventKeys<int>(searchEventTypes);
