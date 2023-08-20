@@ -61,10 +61,13 @@ public class Service : PageParseService
                                 ? new List<string>() { $"{dateSourceItems[0]} {dateSourceItems[1]} {dateSourceItems[2]}" }
                                 //for parse 18, 19, 20 августа 2023
                                 : dateSourceItems.Take(dateSourceLength - 2).Select(date => $"{date} {dateSourceItems[dateSourceLength - 2]} {dateSourceItems[dateSourceLength - 1]}");
-                            
+                           
+                            var timeItem = dateTimeItem.SelectSingleNode(options.EventTimeXPath);
+                            var time = DateTime.ParseExact(timeItem.InnerText.Trim(), timeFormat, CultureInfo.CurrentCulture);
+
                             foreach (var dateSource in datesSources)
                             {
-                                var date = DateTime.ParseExact(dateSource, dateFormat, CultureInfo.CurrentCulture);
+                                var date = DateTime.ParseExact(dateSource, dateFormat, CultureInfo.CurrentCulture).AddHours(time.Hour).AddMinutes(time.Minute);
                                 var chackDate = new DateOnly(date.Year, date.Month, date.Day);
 
                                 if (eventDateIntervals.Any(eventDateInterval => chackDate >= eventDateInterval.StartDate 
@@ -76,11 +79,6 @@ public class Service : PageParseService
                             }
 
                             if (!dates.Any()) { continue; }
-
-                            var timeItem = dateTimeItem.SelectSingleNode(options.EventTimeXPath);
-                            var time = DateTime.ParseExact(timeItem.InnerText.Trim(), timeFormat, CultureInfo.CurrentCulture);
-
-                            dates = dates.Select(date => date.AddHours(time.Hour).AddMinutes(time.Minute)).ToList();
 
                             var eventType = eventKeys.Key;
 
