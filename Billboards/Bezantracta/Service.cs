@@ -1,10 +1,10 @@
 ﻿using HtmlAgilityPack;
 using Microsoft.Extensions.Options;
 using Playbill.Billboards.Common.Enums;
-using Playbill.Billboards.Common.Event;
 using Playbill.Billboards.Common.Extension;
 using Playbill.Billboards.Common.Service;
 using Playbill.Common;
+using Playbill.Common.Event;
 using System.Globalization;
 
 namespace Playbill.Billboards.Bezantracta;

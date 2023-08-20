@@ -1,6 +1,6 @@
 ﻿using Playbill.Common;
 
-namespace Playbill.Billboards.Common.Event;
+namespace Playbill.Common.Event;
 
 public class EventLink
 {

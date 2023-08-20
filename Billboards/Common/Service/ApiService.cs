@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.Options;
 using Playbill.Billboards.Common.Enums;
-using Playbill.Billboards.Common.Event;
 using Playbill.Billboards.Common.Extension;
 using Playbill.Billboards.Common.Interfaces;
 using Playbill.Billboards.Common.Options;
+using Playbill.Common.Event;
 using System.Collections.Concurrent;
 
 namespace Playbill.Billboards.Common.Service;
@@ -78,10 +78,10 @@ public abstract class ApiService<T> : BaseBillboardService
         return responsesBug.ToList();
     }
 
-    protected IList<Event.Event> ConvertToEvents<TEventTypeKey>(List<IConvertToEvent<TEventTypeKey>> responses,
+    protected IList<Event> ConvertToEvents<TEventTypeKey>(List<IConvertToEvent<TEventTypeKey>> responses,
         BaseConvertToEventSetting convertToEventSetting)
     {
-        var resultEvent = new List<Event.Event>();
+        var resultEvent = new List<Event>();
         responses.ForEach(response =>
         {
             var events = response.ConvertToEvents(convertToEventSetting);

@@ -1,4 +1,4 @@
-﻿using Playbill.Billboards.Common.Event;
+﻿using Playbill.Common.Event;
 
 namespace Playbill.Services.ExportEvents.Common.Interfaces;
 

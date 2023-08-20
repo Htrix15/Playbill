@@ -1,4 +1,5 @@
-﻿
+﻿using Playbill.Common.Event;
+
 namespace Playbill.Billboards.Common.Extension;
 
 public static class EventGroupingExtension
@@ -6,10 +7,10 @@ public static class EventGroupingExtension
     /// <summary>
     /// Grouping by First Link Path
     /// </summary>
-    public static IList<Event.Event> DateGrouping(this IList<Event.Event> events)
+    public static IList<Event> DateGrouping(this IList<Event> events)
         => events.GroupBy(@event => @event.Links.FirstOrDefault()?.Path).Select(mainDate => {
             var generalData = mainDate.First();
-            return new Event.Event()
+            return new Event()
             {
                 Billboard = generalData.Billboard,
                 Type = generalData.Type,

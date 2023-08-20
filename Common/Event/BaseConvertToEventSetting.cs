@@ -1,5 +1,4 @@
-﻿
-namespace Playbill.Billboards.Common.Event;
+﻿namespace Playbill.Common.Event;
 
 public abstract class BaseConvertToEventSetting
 {

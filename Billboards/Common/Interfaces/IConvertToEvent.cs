@@ -1,8 +1,8 @@
-﻿using Playbill.Billboards.Common.Event;
+﻿using Playbill.Common.Event;
 
 namespace Playbill.Billboards.Common.Interfaces;
 
 public interface IConvertToEvent<TEventTypeKey>
 {
-    IList<Event.Event> ConvertToEvents(BaseConvertToEventSetting setting);
+    IList<Playbill.Common.Event.Event> ConvertToEvents(BaseConvertToEventSetting setting);
 }

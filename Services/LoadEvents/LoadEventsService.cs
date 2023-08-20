@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.Options;
-using Playbill.Billboards.Common.Event;
 using Playbill.Billboards.Common.Interfaces;
 using Playbill.Billboards.Common.Options;
 using Playbill.Common;
+using Playbill.Common.Event;
 using Playbill.Services.LoadEvents.Common.Service;
 using System.Collections.Concurrent;
 
