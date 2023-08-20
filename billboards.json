@@ -54,7 +54,7 @@
       "Show": [ "show", "standup" ],
       "Children": [ "kids" ],
       "Quests": [ "quest" ],
-      "MasterСlasses": [ "masterclass" ],
+      "MasterClasses": [ "masterclass" ],
       "Tourism": [ "excursions" ]
     },
     "QueryKeys": {
