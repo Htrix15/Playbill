@@ -6,5 +6,6 @@ public enum BillboardTypes
     Ya = 1,
     Bezantracta = 2,
     Quickticket = 3,
-    Eventhall = 4
+    Eventhall = 4,
+    Ticketvrn = 5
 }

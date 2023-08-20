@@ -14,5 +14,6 @@ public static class Options
         services.Configure<Billboards.Bezantracta.Options>(configuration.GetSection("Bezantracta"));
         services.Configure<Billboards.Quickticket.Options>(configuration.GetSection("Quickticket"));
         services.Configure<Billboards.Eventhall.Options>(configuration.GetSection("Eventhall"));
+        services.Configure<Billboards.Ticketvrn.Options>(configuration.GetSection("Ticketvrn"));
     }
 }

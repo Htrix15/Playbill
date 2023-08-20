@@ -15,6 +15,7 @@ public static class Services
             .AddTransient<IBillboardService, Billboards.Bezantracta.Service>()
             .AddTransient<IBillboardService, Billboards.Quickticket.Service>()
             .AddTransient<IBillboardService, Billboards.Eventhall.Service>()
+            .AddTransient<IBillboardService, Billboards.Ticketvrn.Service>()
             ;
     }
 }
