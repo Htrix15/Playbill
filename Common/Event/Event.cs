@@ -1,6 +1,4 @@
-﻿using Playbill.Billboards.Common.Enums;
-
-namespace Playbill.Common.Event;
+﻿namespace Playbill.Common.Event;
 
 public class Event
 {

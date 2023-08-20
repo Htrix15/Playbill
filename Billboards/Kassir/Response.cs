@@ -1,5 +1,4 @@
-﻿using Playbill.Billboards.Common.Enums;
-using Playbill.Billboards.Common.Interfaces;
+﻿using Playbill.Billboards.Common.Interfaces;
 using Playbill.Common.Event;
 
 namespace Playbill.Billboards.Kassir;

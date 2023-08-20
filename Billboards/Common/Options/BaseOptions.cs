@@ -1,4 +1,4 @@
-﻿using Playbill.Billboards.Common.Enums;
+﻿using Playbill.Common.Event;
 
 namespace Playbill.Billboards.Common.Options;
 

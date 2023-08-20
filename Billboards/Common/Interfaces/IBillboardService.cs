@@ -1,5 +1,5 @@
-﻿using Playbill.Billboards.Common.Enums;
-using Playbill.Common;
+﻿using Playbill.Common;
+using Playbill.Common.Event;
 
 namespace Playbill.Billboards.Common.Interfaces;
 

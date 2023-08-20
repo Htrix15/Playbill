@@ -1,4 +1,4 @@
-﻿namespace Playbill.Billboards.Common.Enums;
+﻿namespace Playbill.Common.Event;
 
 public enum EventTypes
 {
@@ -14,5 +14,5 @@ public enum EventTypes
     Other,
     Unidentified,
     Quests,
-    MasterСlasses
+    MasterClasses
 }

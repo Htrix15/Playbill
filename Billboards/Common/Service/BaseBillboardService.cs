@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.Options;
-using Playbill.Billboards.Common.Enums;
 using Playbill.Billboards.Common.Interfaces;
 using Playbill.Billboards.Common.Options;
 using Playbill.Common;
+using Playbill.Common.Event;
 
 namespace Playbill.Billboards.Common.Service;
 
