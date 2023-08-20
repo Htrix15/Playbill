@@ -55,7 +55,7 @@ public class Service : PageParseService
                                     if (dateItem == null) { continue; }
                                     var date = DateTime.ParseExact(dateItem.InnerText.Trim(), options.DateFormat, CultureInfo.CurrentCulture);
                                     var chackDate = new DateOnly(date.Year, date.Month, date.Day);
-                                    if (eventDateIntervals.Any(eventDateInterval => chackDate >= eventDateInterval.StartDate && chackDate <= eventDateInterval.EndDate))
+                                    if (eventDateIntervals.Any(eventDateInterval => chackDate >= eventDateInterval.StartDate && chackDate <= eventDateInterval.EndDate) && date > DateTime.Now)
                                     {
                                         dates.Add(date);
                                     }
