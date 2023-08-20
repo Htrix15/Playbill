@@ -16,5 +16,5 @@ public abstract class BaseLoadEventsService
         _billboardService = billboardService.FilterSupportedBillboards(billboards.Value?.SupportedTypes);
     }
 
-    public abstract Task<IList<Event>> GetEvents(EventDateInterval eventDateInterval);
+    public abstract Task<IList<Event>> GetEventsAsync(IList<EventDateInterval> eventDateIntervals);
 }
