@@ -1,0 +1,137 @@
+{
+  "Kassir": {
+    "BaseSearchUrl": "https://api.kassir.ru/api/search?",
+    "BaseLinkUrl": "https://vrn.kassir.ru",
+    "TimeOut": 3000,
+    "TryCount": 3,
+    "TimeOffset": -3,
+    "DateFormat": "dd.MM.yyyy",
+    "EventKeys": {
+      "Theater": [ 3009 ],
+      "Concert": [ 3000 ],
+      "Sport": [ 3026 ],
+      "Festival": [ 3036 ],
+      "Education": [ 4086 ],
+      "Museum": [ 4093 ],
+      "Show": [ 3016 ],
+      "Children": [ 3022 ],
+      "Tourism": [ 4038 ],
+      "Other": [ 3031, 4002 ]
+    },
+    "QueryKeys": {
+      "CurrentPage": "currentPage",
+      "PageSize": "pageSize",
+      "DateFrom": "dateFrom",
+      "DateEnd": "dateTo",
+      "Domain": "domain",
+      "SortMode": "sortMode",
+      "Category": "categoryId"
+    },
+    "QueryKeysConstants": {
+      "CurrentPage": "1",
+      "PageSize": "900",
+      "SortMode": "0",
+      "Domain": "vrn.kassir.ru"
+    },
+    "ExcludeEventsNames": {
+      "Education": [ "Годовая подписка", "онлайн-платфор", "онлайн-курс" ],
+      "Other": [ "Годовая подписка", "онлайн-платфор", "онлайн-курс" ]
+    },
+    "ExcludePlacesNames": [ "Онлайн" ]
+  },
+  "Ya": {
+    "BaseSearchUrl": "https://afisha.yandex.ru/api/events/rubric/",
+    "BaseLinkUrl": "https://afisha.yandex.ru",
+    "TimeOut": 3000,
+    "TryCount": 3,
+    "DateFormat": "yyyy-MM-dd",
+    "EventKeys": {
+      "Theater": [ "theatre" ],
+      "Concert": [ "concert" ],
+      "Sport": [ "sport" ],
+      "Festival": [ "festival" ],
+      "Museum": [ "art" ],
+      "Show": [ "show", "standup" ],
+      "Children": [ "kids" ],
+      "Quests": [ "quest" ],
+      "MasterСlasses": [ "masterclass" ],
+      "Tourism": [ "excursions" ]
+    },
+    "QueryKeys": {
+      "CurrentPage": "offset",
+      "PageSize": "limit",
+      "DateFrom": "date",
+      "DateEnd": "period",
+      "Domain": "city"
+    },
+    "QueryKeysConstants": {
+      "PageSize": "20",
+      "Domain": "voronezh"
+    },
+    "ExcludePlacesNames": [ "Кино Okko Арена" ]
+  },
+  "Bezantracta": {
+    "BaseSearchUrl": "https://vrn.bezantrakta.ru/",
+    "BaseLinkUrl": "https://vrn.bezantrakta.ru",
+    "DateFormat": "dd MMMM HH:mm",
+    "ItemsContainerXPath": "//div[contains(@class, 'blockAfisha')]",
+    "ItemsXPath": "//div[contains(@class, 'afisha_unit')]",
+    "EventTitleXPath": "div[contains(@class, 'afisha_Name')]",
+    "EventDateXPath": "div[contains(@class, 'afisha_Data')]",
+    "EventImageXPath": "div[contains(@class, 'afisha_linkImg')]/a/div[contains(@class, 'afishaImg')]/img",
+    "PlaceXPath": "div[contains(@class, 'afisha_Name_zal')]",
+    "LinkXPath": "div[contains(@class, 'afisha_linkImg')]/a",
+    "EventKeys": {
+      "Theater": [ "bilety-v-teatr" ],
+      "Concert": [ "bilety-na-koncert" ]
+    }
+  },
+  "Quickticket": {
+    "BaseSearchUrl": "https://quicktickets.ru/",
+    "BaseLinkUrl": "https://quicktickets.ru",
+    "DateFormat": "d MMMM, HH:mm",
+    "ItemsContainerXPath": "//div[contains(@id, 'elems-list')]",
+    "ItemsXPath": "//div[contains(@class, 'elem')]",
+    "EventTitleXPath": "div[contains(@class, 'c')]/h3/a/span[contains(@class, 'underline')]",
+    "DatesXPath": "div[contains(@class, 'c')]/div[contains(@class, 'sessions')]//div[contains(@class, 'session-column')]",
+    "EventDateXPath": "a/span[contains(@class, 'underline')]",
+    "LinkXPath": "div[contains(@class, 'c')]/h3/a[contains(@class, 'notUnderline')]",
+    "EventImageXPath": "div[contains(@class, 'i')]/a/img",
+    "PlaceXPath": "//a[contains(@class, 'title')]/h2",
+    "EventKeys": {
+      "Theater": [ "voronej-dramteatr-kolcova", "voronej-dom-aktera-kravcovoj", "voronezh-teatr-dom-aktera", "voronej-tyuz" ]
+    }
+  },
+  "Eventhall": {
+    "Place": "МТС Live Холл",
+    "BaseSearchUrl": "https://eventhall.ru/afisha/?slg=afisha&mdf_cat=10&page_mdf=",
+    "DateFormat": "dd MMMM yyyy",
+    "TimeFormat": "HH:mm",
+    "ItemsContainerXPath": "//div[contains(@class, 'row px-sm-1')]",
+    "ItemsXPath": "//div[contains(@class, 'poster-item')]",
+    "EventTitleXPath": "div[contains(@class, 'poster-item-info')]/a",
+    "EventDiteTimeXPath": "div[contains(@class, 'poster-item-info')]/div[contains(@class, 'poster-item-info-list')]",
+    "EventDateXPath": "div[contains(@class, 'poster-item-info-date')]/span",
+    "EventTimeXPath": "div[contains(@class, 'poster-item-info-time')]/span",
+    "EventImageXPath": "a/div[contains(@class, 'post-item-img-holder')]/img",
+    "EventKeys": {
+      "Concert": [ "a824bfcf0cd3abae2fa0350e3ca58e17", "deb836973ec9faab8cb05554c5ae8741" ],
+      "Show": [ "7091f98ff4ff3685b25cdb2b355ca9b6", "60911178dd97f1af185f5ca09f08ebda" ],
+      "Other": [ "cc3d6abd11e1545b387d74278d980298", "74d4edc1e56fb6fa88f1a69741ec64ca", "dfdd8542fc3a5867b4b56a273e966786" ],
+      "Children": [ "67e0943a0bc5e039f12aa9c4b9ef0e03" ],
+      "Theater": [ "6e73c5935b19971af20d9f223e0e8db7" ],
+      "Festival": [ "1d9950bf4d4dfe891abb6dd556e94b68" ]
+    }
+  },
+  "Ticketvrn": {
+    "BaseSearchUrl": "http://ticketvrn.ru/",
+    "BaseLinkUrl": "http://ticketvrn.ru",
+    "DateFormat": "dd MMMM HH:mm",
+    "ItemsContainerXPath": "//div[contains(@class, 'blockAfisha')]",
+    "ItemsXPath": "//div[contains(@class, 'afisha_unit')]",
+    "EventTitleXPath": "div[contains(@class, 'afisha_Name')]",
+    "EventDateXPath": "div[contains(@class, 'afisha_Data')]",
+    "EventImageXPath": "div[contains(@class, 'afisha_linkImg')]/a/div[contains(@class, 'afishaImg')]/img",
+    "PlaceXPath": "div[contains(@class, 'afisha_Name_zal')]"
+  }
+}

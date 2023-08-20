@@ -8,6 +8,8 @@ public static class Configurations
     {
         return new ConfigurationBuilder()
             .AddJsonFile("appsettings.json", optional: false)
+            .AddJsonFile("place-synonyms.json", optional: false)
+            .AddJsonFile("billboards.json", optional: false)
             .Build();
     }
 }
