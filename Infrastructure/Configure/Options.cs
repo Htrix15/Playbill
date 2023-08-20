@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Playbill.Billboards.Common.Options;
+using Playbill.Services.EventsGrouping;
 
 namespace Playbill.Infrastructure.Configure;
 
@@ -15,5 +16,6 @@ public static class Options
         services.Configure<Billboards.Quickticket.Options>(configuration.GetSection("Quickticket"));
         services.Configure<Billboards.Eventhall.Options>(configuration.GetSection("Eventhall"));
         services.Configure<Billboards.Ticketvrn.Options>(configuration.GetSection("Ticketvrn"));
+        services.Configure<PlaceSynonymsOptions>(configuration.GetSection("PlaceSynonyms"));
     }
 }
