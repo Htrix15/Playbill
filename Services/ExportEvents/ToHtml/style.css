@@ -1,0 +1,96 @@
+﻿.events {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.event {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: space-between;
+    border: 2px solid lightslategray;
+    height: 550px;
+    width: 200px;
+    padding: 10px 10px;
+    margin: 10px 10px;
+}
+
+.img-wrapper {
+    width: 100%;
+    height: 50%;
+}
+
+img {
+    width: 100%;
+    height: auto;
+}
+
+.info {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: space-between;
+}
+
+h2 {
+    font-size: 16px
+}
+
+.buttons {
+    width: 100%;
+}
+
+button {
+    width: 100%;
+    margin: 5px 0px;
+}
+
+.event-theater {
+    background: bisque;
+}
+
+.event-concert {
+    background: burlywood;
+}
+
+.event-sport {
+    background: honeydew;
+}
+
+.event-festival {
+    background: ivory;
+}
+
+.event-education {
+    background: lightcyan;
+}
+
+.event-museum {
+    background: lightgoldenrodyellow;
+}
+
+.event-show {
+    background: lavender;
+}
+
+.event-children {
+    background: palegoldenrod;
+}
+
+.event-tourism {
+    background: peachpuff;
+}
+
+.event-other {
+    background: seashell;
+}
+
+.event-unidentified {
+    background: lavenderblush;
+}
+
+.event-quests {
+    background: ghostwhite;
+}
+
+.event-masterclasses {
+    background: azure;
+}

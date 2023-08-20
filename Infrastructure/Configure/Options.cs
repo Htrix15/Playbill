@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Playbill.Billboards.Common.Options;
 using Playbill.Services.EventsGrouping;
+using Playbill.Services.ExportEvents.ToHtml;
 
 namespace Playbill.Infrastructure.Configure;
 
@@ -17,5 +18,6 @@ public static class Options
         services.Configure<Billboards.Eventhall.Options>(configuration.GetSection("Eventhall"));
         services.Configure<Billboards.Ticketvrn.Options>(configuration.GetSection("Ticketvrn"));
         services.Configure<PlaceSynonymsOptions>(configuration.GetSection("PlaceSynonyms"));
+        services.Configure<ExportToHtmlOptions>(configuration.GetSection("ExportToHtml"));
     }
 }

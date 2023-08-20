@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Options;
-using Playbill.Billboards.Common.Enums;
 using Playbill.Common.Event;
 
 namespace Playbill.Services.EventsGrouping;
