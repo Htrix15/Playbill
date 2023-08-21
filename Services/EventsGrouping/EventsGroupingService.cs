@@ -93,18 +93,6 @@ public class EventsGroupingService
             .OrderBy(@event => @event.Date)
             .ToList();
 
-        // remove 1 hours time lag for kassir (two time for one event)
-        groupedEvent = groupedEvent
-            .Where((@event, i) => {
-                if (i == 0) return true;
-                if (@event.Title != groupedEvent[i - 1].Title) return true;
-                if (@event.Date!.Value.Date != groupedEvent[i - 1].Date!.Value.Date) return true;
-                var timeDifferent = Math.Abs(@event.Date!.Value.Hour - groupedEvent[i - 1].Date!.Value.Hour);
-                if (timeDifferent > 1) return true;
-                return false;
-            } )
-            .ToList();
-
         return groupedEvent;
     }
 }
