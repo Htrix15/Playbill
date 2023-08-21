@@ -15,9 +15,9 @@ public abstract class BaseBillboardService: IBillboardService
     {
         _options = options.Value;
     }
-    public abstract Task<IList<Playbill.Common.Event.Event>> GetEventsAsync(IList<EventDateInterval> eventDateIntervals, IList<EventTypes>? searchEventTypes = null);
+    public abstract Task<IList<Event>> GetEventsAsync(IList<EventDateInterval> eventDateIntervals, HashSet<EventTypes>? searchEventTypes = null);
 
-    protected IList<Playbill.Common.Event.Event> FilterEvents(IList<Playbill.Common.Event.Event> events) =>
+    protected IList<Event> FilterEvents(IList<Event> events) =>
         events.Where(@event =>
         {
             var validPlace = (!(_options.ExcludePlacesNames?.Contains(@event.Place, StringComparer.CurrentCultureIgnoreCase)) ?? true);

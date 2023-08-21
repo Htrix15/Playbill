@@ -30,7 +30,7 @@ public class Service : ApiService<string>
     }
 
 
-    public override async Task<IList<Event>> GetEventsAsync(IList<EventDateInterval> eventDateIntervals, IList<EventTypes>? searchEventTypes = null)
+    public override async Task<IList<Event>> GetEventsAsync(IList<EventDateInterval> eventDateIntervals, HashSet<EventTypes>? searchEventTypes = null)
     {
         var result = new List<Event>();
 

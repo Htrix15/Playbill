@@ -31,7 +31,7 @@ public class Service : ApiService<int>
         return options.BaseSearchUrl + string.Join('&', keys);
     }
 
-    public override async Task<IList<Event>> GetEventsAsync(IList<EventDateInterval> eventDateIntervals, IList<EventTypes>? searchEventTypes = null)
+    public override async Task<IList<Event>> GetEventsAsync(IList<EventDateInterval> eventDateIntervals, HashSet<EventTypes>? searchEventTypes = null)
     {
         var result = new List<Event>();
 

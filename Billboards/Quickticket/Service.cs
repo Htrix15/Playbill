@@ -15,7 +15,7 @@ public class Service : PageParseService
 
     public override BillboardTypes BillboardType => BillboardTypes.Quickticket;
 
-    public override async Task<IList<Event>> GetEventsAsync(IList<EventDateInterval> eventDateIntervals, IList<EventTypes>? searchEventTypes = null)
+    public override async Task<IList<Event>> GetEventsAsync(IList<EventDateInterval> eventDateIntervals, HashSet<EventTypes>? searchEventTypes = null)
     {
         var options = (_options as Options);
 

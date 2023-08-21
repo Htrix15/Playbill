@@ -10,7 +10,7 @@ namespace Playbill.Services.LoadEvents;
 
 public class LoadEventsService : BaseLoadEventsService
 {
-    public LoadEventsService(IOptions<SupportedBillboardTypesOptions> billboards, IEnumerable<IBillboardService> billboardService) : base(billboards, billboardService)
+    public LoadEventsService(IOptions<SearchOptions> billboards, IEnumerable<IBillboardService> billboardService) : base(billboards, billboardService)
     {
     }
 
@@ -18,11 +18,16 @@ public class LoadEventsService : BaseLoadEventsService
     {
         var eventsBug = new ConcurrentBag<IList<Event>>();
 
-        var loaders = _billboardService.Select(async service => eventsBug.Add(await service.GetEventsAsync(eventDateIntervals)));
+        var loaders = _billboardService.Select(async service => eventsBug.Add(await service.GetEventsAsync(eventDateIntervals, _searchEventTypes)));
 
         await Task.WhenAll(loaders.ToArray());
 
         var result = eventsBug.SelectMany(events => events).ToList();
+
+        if (_removeUnidentifiedEventType)
+        {
+            return result.Where(@event => @event.Type != EventTypes.Unidentified).ToList();
+        }
         return result;
     }
 }

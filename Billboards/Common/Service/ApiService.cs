@@ -11,7 +11,7 @@ public abstract class ApiService<T> : BaseBillboardService
 {
     protected ApiService(IOptions<ApiOptions<T>> options) : base(options) { }
 
-    protected List<KeyValuePair<EventTypes, HashSet<TEventKey>>> EventKeys<TEventKey>(IList<EventTypes>? searchEventTypes) =>
+    protected List<KeyValuePair<EventTypes, HashSet<TEventKey>>> EventKeys<TEventKey>(HashSet<EventTypes>? searchEventTypes) =>
         (_options as ApiOptions<TEventKey>)?.EventKeys?.FilterEventKeys(searchEventTypes).ToList() ?? new List<KeyValuePair<EventTypes, HashSet<TEventKey>>>();
    
     protected async Task<string?> CallRequestAsync(string request)

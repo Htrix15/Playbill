@@ -9,6 +9,6 @@ public abstract class PageParseService : BaseBillboardService
 {
     protected PageParseService(IOptions<PageParseOptions> options) : base(options) { }
 
-    protected List<KeyValuePair<EventTypes, HashSet<string>>> EventKeys(IList<EventTypes>? searchEventTypes) =>
+    protected List<KeyValuePair<EventTypes, HashSet<string>>> EventKeys(HashSet<EventTypes>? searchEventTypes) =>
     (_options as PageParseOptions)?.EventKeys?.FilterEventKeys(searchEventTypes).ToList() ?? new List<KeyValuePair<EventTypes, HashSet<string>>>();
 }
