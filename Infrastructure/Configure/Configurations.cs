@@ -10,6 +10,7 @@ public static class Configurations
             .AddJsonFile("appsettings.json", optional: false)
             .AddJsonFile("place-synonyms.json", optional: false)
             .AddJsonFile("billboards.json", optional: false)
+            .AddJsonFile("title-compare-settings.json", optional: false)
             .Build();
     }
 }
