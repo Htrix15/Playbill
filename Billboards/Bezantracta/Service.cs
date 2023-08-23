@@ -4,13 +4,16 @@ using Playbill.Billboards.Common.Extension;
 using Playbill.Billboards.Common.Service;
 using Playbill.Common;
 using Playbill.Common.Event;
+using Playbill.Services.TitleNormalization.Common;
 using System.Globalization;
 
 namespace Playbill.Billboards.Bezantracta;
 
 public class Service : PageParseService
 {
-    public Service(IOptions<Options> options) : base(options) {}
+    public Service(IOptions<Options> options, ITitleNormalization titleNormalizationService) : base(options, titleNormalizationService)
+    {
+    }
 
     public override BillboardTypes BillboardType => BillboardTypes.Bezantracta;
 
@@ -68,6 +71,8 @@ public class Service : PageParseService
                                 Type = eventType,
                                 Dates = new List<DateTime>() { date },
                                 Title = title,
+                                NormilizeTitle = _titleNormalizationService.TitleNormalization(title),
+                                NormilizeTitleTerms = _titleNormalizationService.CreateTitleNormalizationTerms(title),
                                 ImagePath = imagePath,
                                 Place = place,
                                 Links = new List<EventLink>()

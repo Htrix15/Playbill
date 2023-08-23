@@ -4,12 +4,15 @@ using Playbill.Billboards.Common.Extension;
 using Playbill.Billboards.Common.Service;
 using Playbill.Common;
 using Playbill.Common.Event;
+using Playbill.Services.TitleNormalization.Common;
 
 namespace Playbill.Billboards.Kassir;
 
 public class Service : ApiService<int>
 {
-    public Service(IOptions<Options> options) : base(options){}
+    public Service(IOptions<Options> options, ITitleNormalization titleNormalizationService) : base(options, titleNormalizationService)
+    {
+    }
 
     public override BillboardTypes BillboardType => BillboardTypes.Kassir;
 
@@ -48,9 +51,9 @@ public class Service : ApiService<int>
 
         foreach (var eventKey in filteredEventKeys)
         {
-            foreach(var eventDateInterval in eventDateIntervals)
+            foreach (var eventDateInterval in eventDateIntervals)
             {
-                foreach(var categoryId in eventKey.Value)
+                foreach (var categoryId in eventKey.Value)
                 {
                     var searchDate = eventDateInterval.StartDate;
                     do
@@ -71,6 +74,12 @@ public class Service : ApiService<int>
         }
 
         result = result.DateGrouping().ToList();
+
+        result.ForEach(@event =>
+        {
+            @event.NormilizeTitle = _titleNormalizationService.TitleNormalization(@event.Title);
+            @event.NormilizeTitleTerms = _titleNormalizationService.CreateTitleNormalizationTerms(@event.Title);
+        });
 
         return result;
     }

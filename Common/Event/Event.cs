@@ -10,7 +10,8 @@ public class Event
     public DateTime? Date => Dates?.FirstOrDefault();
     public List<DateOnly>? EstimatedDates { get; set; }
     public required string? Title { get; set; }
-    public string NormilizeTitle => Regex.Replace(Title ?? "", RegexPatterns.NormilizeTitle, "").ToLower();
+    public string NormilizeTitle { get; set; }
+    public List<string> NormilizeTitleTerms { get; set; }
     public required string? ImagePath { get; set; }
     public required string? Place { get; set; }
     public required List<EventLink> Links { get; set; }

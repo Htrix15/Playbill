@@ -1,27 +1,23 @@
 ﻿using Microsoft.Extensions.Options;
 using Playbill.Common.Event;
-using Playbill.Services.EventTitleCompare;
 
 namespace Playbill.Services.EventsGrouping;
 
 public class EventsGroupingService
 {
-    private List<PlaceSynonyms> _synonyms { get; init; }
-    private EventTitleCompareService _eventTitleCompareService { get; init; }
-    public EventsGroupingService(IOptions<PlaceSynonymsOptions> synonyms, 
-        EventTitleCompareService eventTitleCompareService)
+    private readonly List<PlaceSynonyms> _synonyms;
+    private const string _subscription = "абонемент";
+    public EventsGroupingService(IOptions<PlaceSynonymsOptions> synonyms)
     {
         _synonyms = synonyms.Value?.Synonyms ?? new List<PlaceSynonyms>();
-        _eventTitleCompareService = eventTitleCompareService;
     }
-    public  IList<Event> EventsGrouping(IList<Event> events)
-    {
-        var _events = events.ToList();
-        var eventsWithAlternativeDate = new List<Event>();
-        foreach(var @event in _events)
-        {
-            _synonyms.ForEach(synonyms => synonyms.SetPlaceName(@event));
 
+    private List<Event> EventDatePreparation(List<Event> events)
+    {
+        var eventsWithAlternativeDate = new List<Event>();
+
+        foreach (var @event in events)
+        {
             if (@event.Dates?.Count > 1)
             {
                 @event.Dates.Skip(1).ToList().ForEach(date => eventsWithAlternativeDate.Add(
@@ -31,6 +27,8 @@ public class EventsGroupingService
                         Type = @event.Type,
                         Dates = new List<DateTime>() { date },
                         Title = @event.Title,
+                        NormilizeTitle = @event.NormilizeTitle,
+                        NormilizeTitleTerms = @event.NormilizeTitleTerms,
                         ImagePath = @event.ImagePath,
                         Place = @event.Place,
                         Links = @event.Links
@@ -47,19 +45,23 @@ public class EventsGroupingService
                         Dates = null,
                         EstimatedDates = new List<DateOnly>() { date },
                         Title = @event.Title,
+                        NormilizeTitle = @event.NormilizeTitle,
+                        NormilizeTitleTerms = @event.NormilizeTitleTerms,
                         ImagePath = @event.ImagePath,
                         Place = @event.Place,
                         Links = @event.Links
                     }));
                 @event.EstimatedDates = @event.EstimatedDates.Take(1).ToList();
             }
+
         }
-        _events.AddRange(eventsWithAlternativeDate);
 
-        var eventsWithoutDate = _events.Where(@event => @event.Dates == null || !@event.Dates.Any()).ToList();
-        var eventsWithDate = _events.Where(@event => @event.Dates != null && @event.Dates.Any()).ToList();
+        events.AddRange(eventsWithAlternativeDate);
 
-        foreach(var @event in eventsWithoutDate)
+        var eventsWithoutDate = events.Where(@event => @event.Dates == null || !@event.Dates.Any()).ToList();
+        var eventsWithDate = events.Where(@event => @event.Dates != null && @event.Dates.Any()).ToList();
+
+        foreach (var @event in eventsWithoutDate)
         {
             var estimatedDate = @event.EstimatedDates.First();
             var foundDate = eventsWithDate.FirstOrDefault(eventWithDate =>
@@ -73,7 +75,8 @@ public class EventsGroupingService
                 {
                     foundDate.Value
                 };
-            } else
+            }
+            else
             {
                 @event.Dates = new List<DateTime>()
                 {
@@ -81,11 +84,99 @@ public class EventsGroupingService
                 };
             }
         }
+
+        return events;
+    }
+
+    private void EventPlacePreparation(List<Event> events)
+    {
+        events.ForEach(@event => _synonyms.ForEach(synonyms => synonyms.SetPlaceName(@event)));
+    }
+
+    private bool TitleCompare(Event event1, Event event2)
+    {
+        if (string.Equals(event1.NormilizeTitle, event2.NormilizeTitle)) return true;
+
+        var event1Subscription = event1.NormilizeTitle.Contains(_subscription);
+        var event2Subscription = event2.NormilizeTitle.Contains(_subscription);
+        var checkBothSubscription = (event1Subscription && event2Subscription) || (!event1Subscription && !event2Subscription);
+
+        if (event1.NormilizeTitle.Contains(event2.NormilizeTitle) || event2.NormilizeTitle.Contains(event1.NormilizeTitle))
+        {
+            if (checkBothSubscription)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        var titleTerms1 = event1.NormilizeTitleTerms;
+        var titleTerms1Counts = titleTerms1.Count;
+
+        var titleTerms2 = event2.NormilizeTitleTerms;
+        var titleTerms2Counts = titleTerms2.Count;
+
+        var minLegtn = new[] { titleTerms1Counts, titleTerms2Counts }.Min();
+
+        var intersectCount = titleTerms1.Intersect(titleTerms2).Count();
+        var tolerance = minLegtn * 0.8;
+
+        if (intersectCount >= tolerance && checkBothSubscription)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    private List<Event> Grouping(IList<Event> events) 
+    {
+        var result = new List<Event>();
+        var i = 0;
+
+        do
+        {
+            var newEvent = events[i];
+            var foundEvents = events.Skip(i + 1).Where(@event =>
+                @event.Date.Value.TimeOfDay == newEvent.Date.Value.TimeOfDay
+                && TitleCompare(newEvent, @event)).ToList();
+            if (foundEvents.Any())
+            {
+                newEvent.Links.AddRange(foundEvents.SelectMany(@event => @event.Links));
+
+                var titles = new List<string>() { newEvent.Title };
+                titles.AddRange(foundEvents.Select(@event => @event.Title));
+                newEvent.Title = titles.OrderByDescending(title => title.Length).First();
+
+                var places = new List<string>() { newEvent.Place };
+                places.AddRange(foundEvents.Select(@event => @event.Place));
+                newEvent.Place = string.Join(" | ", places.Distinct());
+
+                foreach (var @event in foundEvents)
+                {
+                    events.Remove(@event);
+                }
+            }
+            result.Add(newEvent);
+            i++;
+            continue;
+        }
+        while (i < events.Count);
+
+        return result;
+    }
+
+    public IList<Event> EventsGrouping(IList<Event> events)
+    {
+        var _events = EventDatePreparation(events.ToList());
+
+        EventPlacePreparation(_events);
+
         var result = new List<Event>();
 
         _events.GroupBy(@event => @event.Date.Value.Date)
             .ToList()
-            .ForEach(@event => result.AddRange(_eventTitleCompareService.GropingByTitle(@event.ToList())));
+            .ForEach(@event => result.AddRange(Grouping(@event.ToList())));
 
         return result.OrderBy(@event => @event.Date)
             .ThenBy(@event => @event.Place)

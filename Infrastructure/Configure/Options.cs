@@ -2,8 +2,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using Playbill.Billboards.Common.Options;
 using Playbill.Services.EventsGrouping;
-using Playbill.Services.EventTitleCompare;
 using Playbill.Services.ExportEvents.ToHtml;
+using Playbill.Services.TitleNormalization;
 
 namespace Playbill.Infrastructure.Configure;
 
@@ -20,6 +20,6 @@ public static class Options
         services.Configure<Billboards.Ticketvrn.Options>(configuration.GetSection("Ticketvrn"));
         services.Configure<PlaceSynonymsOptions>(configuration.GetSection("PlaceSynonyms"));
         services.Configure<ExportToHtmlOptions>(configuration.GetSection("ExportToHtml"));
-        services.Configure<TitleCompareOptions>(configuration.GetSection("TitleCompareOptions"));
+        services.Configure<TitleNormalizationOptions>(configuration.GetSection("TitleNormalizationOptions"));
     }
 }

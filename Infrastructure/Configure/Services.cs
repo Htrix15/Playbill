@@ -2,9 +2,10 @@
 using Playbill.Billboards.Common.Interfaces;
 using Playbill.Services.EventDateIntervals;
 using Playbill.Services.EventsGrouping;
-using Playbill.Services.EventTitleCompare;
 using Playbill.Services.ExportEvents.ToHtml;
 using Playbill.Services.LoadEvents;
+using Playbill.Services.TitleNormalization;
+using Playbill.Services.TitleNormalization.Common;
 
 namespace Playbill.Infrastructure.Configure;
 
@@ -23,7 +24,7 @@ public static class Services
             .AddTransient<LoadEventsService>()
             .AddTransient<EventsGroupingService>()
             .AddTransient<ExportToHtmlService>()
-            .AddTransient<EventTitleCompareService>()
+            .AddTransient<ITitleNormalization, TitleNormalizationService>()
             ;
     }
 }

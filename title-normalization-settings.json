@@ -1,5 +1,6 @@
 {
-  "TitleCompareOptions": {
+  "TitleNormalizationOptions": {
+    "MaxSizeForNotWordEndingsRemoveing": 3,
     "Separators": [ " ", ",", ".", "-", "(", ")", "\"", "'", "<", ">", "«", "»", "!", "?", "/", "\\" ],
     "WordEndings": [
       "яя",

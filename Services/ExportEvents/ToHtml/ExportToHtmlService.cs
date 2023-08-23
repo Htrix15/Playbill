@@ -6,7 +6,7 @@ namespace Playbill.Services.ExportEvents.ToHtml;
 
 public class ExportToHtmlService : IExportEvents
 {
-    private ExportToHtmlOptions _options { get; init; }
+    private readonly ExportToHtmlOptions _options;
     public ExportToHtmlService(IOptions<ExportToHtmlOptions> exportToHtmlOptions)
     {
         _options = exportToHtmlOptions.Value;

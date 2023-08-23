@@ -17,6 +17,8 @@ public static class EventGroupingExtension
                 Dates = mainDate.Where(@event => @event.Dates != null).SelectMany(date => date.Dates)?.Distinct().ToList(),
                 EstimatedDates = mainDate.Where(@event => @event.EstimatedDates != null).SelectMany(date => date.EstimatedDates)?.Distinct().ToList(),
                 Title = generalData.Title,
+                NormilizeTitle = generalData.NormilizeTitle,
+                NormilizeTitleTerms = generalData.NormilizeTitleTerms,
                 ImagePath = generalData.ImagePath,
                 Place = generalData.Place,
                 Links = generalData.Links,
