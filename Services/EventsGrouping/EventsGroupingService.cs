@@ -159,7 +159,6 @@ public class EventsGroupingService
             }
             result.Add(newEvent);
             i++;
-            continue;
         }
         while (i < events.Count);
 

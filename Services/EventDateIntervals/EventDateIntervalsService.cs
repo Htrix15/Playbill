@@ -1,193 +1,198 @@
 ﻿using Playbill.Common;
-using Playbill.Services.EventDateIntervals.Common.Extension;
-using Playbill.Services.EventDateIntervals.Common.Service;
+using Playbill.Services.EventDateIntervals.Common.Enums;
+using Playbill.Services.EventDateIntervals.Common.Exceptions;
+using Playbill.Services.EventDateIntervals.Common.Extensions;
+using Playbill.Services.EventDateIntervals.Common.Interfaces;
 
 namespace Playbill.Services.EventDateIntervals;
 
-internal class EventDateIntervalsService : BaseEventDateIntervalsService
+internal class EventDateIntervalsService : IGetEventDateIntervals
 {
-    public override IList<EventDateInterval> GetByRange(DateOnly startDate, DateOnly endDate)
+    private enum Direction
     {
-        return new List<EventDateInterval>(){ new EventDateInterval()
-        {
-            StartDate = startDate,
-            EndDate = endDate
-        }};
+        Raise,
+        Lower
     }
 
-    public override IList<EventDateInterval> GetMonth()
+    private DateTime GetNearestDayFromDaysOfWeek(DateTime minDate, 
+        DateTime maxDate, 
+        HashSet<DayOfWeek> daysOfWeek, 
+        Direction direction = Direction.Raise)
     {
-        var now = DateTime.Now;
-        return new List<EventDateInterval>(){ new EventDateInterval()
+        var date = direction switch
         {
-            StartDate = DateOnly.FromDateTime(now),
-            EndDate = new DateOnly(now.Year, now.Month, DateTime.DaysInMonth(now.Year, now.Month)),
-        }};
-    }
+            Direction.Raise => minDate,
+            Direction.Lower => maxDate,
+            _ => throw new NotImplementedException()
+        };
 
-    public override IList<EventDateInterval> GetNextWeekend()
-    {
-        var now = DateTime.Now;
-
-        var startDate = DateOnly.FromDateTime(now);
-
-        if (now.DayOfWeek == DayOfWeek.Sunday)
+        var step = direction switch
         {
+            Direction.Raise => 1,
+            Direction.Lower => -1,
+            _ => throw new NotImplementedException()
+        };
 
-            return new List<EventDateInterval>(){ new EventDateInterval()
+        while (!daysOfWeek.Contains(date.DayOfWeek))
+        {
+            date = date.AddDays(step);
+            if (date.Date == maxDate.Date && !daysOfWeek.Contains(date.DayOfWeek))
             {
-                StartDate = startDate,
-                EndDate = startDate,
-            }};
-        }
-
-        startDate = startDate.NearestDayOfWeek(DayOfWeek.Saturday);
-        return new List<EventDateInterval>(){ new EventDateInterval()
-        {
-            StartDate = startDate,
-            EndDate = startDate.AddDays(1),
-        }};
-    }
-
-    public override IList<EventDateInterval> GetNext30Days()
-    {
-        var now = DateTime.Now;
-        return new List<EventDateInterval>(){ new EventDateInterval()
-        {
-            StartDate = DateOnly.FromDateTime(now),
-            EndDate = DateOnly.FromDateTime(now.AddDays(30)),
-        }};
-    }
-
-    public override IList<EventDateInterval> GetNext30DaysWeekends()
-    {
-        var result = new List<EventDateInterval>();
-
-        var nextWeekend = GetNextWeekend().First();
-        result.Add(nextWeekend);
-
-        var startDateForSearch = nextWeekend;
-
-        if (startDateForSearch.EndDate == startDateForSearch.StartDate)
-        {
-            startDateForSearch.StartDate = startDateForSearch.EndDate.AddDays(-1);
-        }
-
-        var maxEndDate = DateOnly.FromDateTime(DateTime.Now.AddDays(30));
-
-        for (var i = 1; i <= 4; i++)//30 days / 7 = 4
-        {
-            var nextWeekWeekend = startDateForSearch;
-            nextWeekWeekend.StartDate = startDateForSearch.StartDate.AddDays(7 * i);
-            nextWeekWeekend.EndDate = startDateForSearch.EndDate.AddDays(7 * i);
-
-            if (nextWeekWeekend.StartDate > maxEndDate)
-            {
-                break;
+                throw new OutOfRangeDayException();
             }
+        }
+        return date;
+    }
 
-            if (nextWeekWeekend.StartDate == maxEndDate || nextWeekWeekend.EndDate > maxEndDate)
-            {
-                nextWeekWeekend.EndDate = nextWeekWeekend.StartDate;
-                result.Add(nextWeekWeekend);
-                break;
-            }
-            result.Add(nextWeekWeekend);
+
+    public IList<EventDateInterval> GetDateIntervals(HashSet<DayOfWeek> daysOfWeek, DatePeriods? datePeriods = null, DateOnly? startDate = null, DateOnly? endDate = null)
+    {
+        if ((startDate.HasValue && !endDate.HasValue) || (!startDate.HasValue && endDate.HasValue))
+        {
+            throw new Exception("Invalid input options. Check: " + (startDate.HasValue ? "endDate" : "startDate"));
         }
 
-        return result;
-    }
-
-    public override IList<EventDateInterval> GetNextWeek()
-    {
-        var now = DateTime.Now;
-        var startDate = DateOnly
-            .FromDateTime(now)
-            .NearestDayOfWeek(DayOfWeek.Monday)
-            .AddDays(now.DayOfWeek == DayOfWeek.Monday ? 7 : 0);
-
-        return new List<EventDateInterval>(){ new EventDateInterval()
+        if (!startDate.HasValue && !endDate.HasValue && !datePeriods.HasValue)
         {
-            StartDate = startDate,
-            EndDate = startDate.AddDays(6),
-        }};
-    }
+            throw new Exception("Invalid input options. Check: datePeriods, endDate, startDate");
+        }
 
-    public override IList<EventDateInterval> GetNextWeekWeekend()
-    {
-        var now = DateTime.Now;
-        var startDate =  DateOnly.FromDateTime(now)
-            .NearestDayOfWeek(DayOfWeek.Saturday)
-            .AddDays(now.DayOfWeek == DayOfWeek.Sunday ? 0 : 7);
-
-        return new List<EventDateInterval>(){ new EventDateInterval()
-        {
-            StartDate = startDate,
-            EndDate = startDate.AddDays(1),
-        }};
-    }
-
-    public override IList<EventDateInterval> GetThisMonthWeekends()
-    {
         var result = new List<EventDateInterval>();
-        var now = DateTime.Now;
-        var thisMonth = now.Month;
+        if (!daysOfWeek.Any())
+        {
+            daysOfWeek = new HashSet<DayOfWeek>() { 
+                DayOfWeek.Sunday,
+                DayOfWeek.Monday,
+                DayOfWeek.Tuesday,
+                DayOfWeek.Wednesday,
+                DayOfWeek.Thursday,
+                DayOfWeek.Friday,
+                DayOfWeek.Saturday,
+            };
+        }
 
-        var lastMonthDay = DateTime.DaysInMonth(now.Year, thisMonth);
+        var minDate = DateTime.Now;
+        if (startDate.HasValue && startDate > DateOnly.FromDateTime(minDate))
+        {
+            minDate = startDate.Value.ToDateTime(TimeOnly.MinValue);
+        }
 
-        var nextWeekend = GetNextWeekend().First();
+        var maxDate = DateTime.Now;
+        if (endDate.HasValue && endDate > DateOnly.FromDateTime(maxDate))
+        {
+            maxDate = endDate.Value.ToDateTime(TimeOnly.MaxValue);
+        }
 
-        if (nextWeekend.StartDate.Month > thisMonth)
+        if (datePeriods.HasValue && !(startDate.HasValue && endDate.HasValue))
+        {
+            minDate = datePeriods switch
+            {
+                DatePeriods.ThisWeek => minDate,
+                DatePeriods.NextWeek => minDate.NearestDayOfWeek(DayOfWeek.Monday).AddDays(minDate.DayOfWeek == DayOfWeek.Monday ? 7 : 0),
+                DatePeriods.ThisMonth => minDate,
+                DatePeriods.Next30Days => minDate,
+                DatePeriods.ThisYear => minDate,
+                _ => throw new NotImplementedException(),
+            };
+
+            maxDate = datePeriods switch
+            {
+                DatePeriods.ThisWeek => minDate.NearestDayOfWeek(DayOfWeek.Monday).AddDays(minDate.DayOfWeek == DayOfWeek.Monday ? 6 : -1),
+                DatePeriods.NextWeek => minDate.AddDays(6),
+                DatePeriods.ThisMonth => new DateTime(minDate.Year, minDate.Month, DateTime.DaysInMonth(minDate.Year, minDate.Month)),
+                DatePeriods.Next30Days => minDate.AddDays(30),
+                DatePeriods.ThisYear => new DateTime(minDate.Year, 12, 31),
+                _ => throw new NotImplementedException(),
+            };
+        }
+
+        if (daysOfWeek.Count == 7)
+        {
+            result.Add(new EventDateInterval()
+            {
+                StartDate = DateOnly.FromDateTime(minDate),
+                EndDate = DateOnly.FromDateTime(maxDate)
+            });
+            return result;
+        }
+
+        if (minDate.Date == maxDate.Date) {
+
+            if (daysOfWeek.Contains(minDate.DayOfWeek))
+            {
+                result.Add(new EventDateInterval()
+                {
+                    StartDate = DateOnly.FromDateTime(minDate),
+                    EndDate = DateOnly.FromDateTime(minDate)
+                });
+            }
+            else
+            {
+                return result;
+            }
+        }
+
+        try
+        {
+            minDate = GetNearestDayFromDaysOfWeek(minDate, maxDate, daysOfWeek);
+            maxDate = GetNearestDayFromDaysOfWeek(minDate, maxDate, daysOfWeek, Direction.Lower);
+        }
+        catch(OutOfRangeDayException)
         {
             return result;
         }
 
-        if (nextWeekend.EndDate.Month > thisMonth)
+        var allDate = new List<EventDateInterval>()
         {
-            return new List<EventDateInterval>(){ new EventDateInterval()
-            {
-                StartDate = nextWeekend.StartDate,
-                EndDate = nextWeekend.StartDate,
-            }};
-        }
-        result.Add(nextWeekend);
-
-        var startDateForSearch = nextWeekend;
-
-        if (startDateForSearch.EndDate == startDateForSearch.StartDate)
-        {
-            startDateForSearch.StartDate = startDateForSearch.EndDate.AddDays(-1);
-        }
-
-        for (var i = 1; i <= (lastMonthDay - now.Day) / 7; i++)
-        {
-            var nextWeekWeekend = startDateForSearch;
-            nextWeekWeekend.StartDate = startDateForSearch.StartDate.AddDays(7 * i);
-            nextWeekWeekend.EndDate = startDateForSearch.EndDate.AddDays(7 * i);
-            if (nextWeekWeekend.StartDate.Month > thisMonth)
-            {
-                break;
+            new EventDateInterval() {
+                StartDate = DateOnly.FromDateTime(minDate),
+                EndDate = DateOnly.FromDateTime(minDate)
             }
-            if (nextWeekWeekend.EndDate.Month > thisMonth)
+        };
+
+        var searchDay = minDate.AddDays(1);
+        while (searchDay.Date <= maxDate.Date)
+        {
+            searchDay = GetNearestDayFromDaysOfWeek(searchDay, maxDate, daysOfWeek);
+            allDate.Add(new EventDateInterval()
             {
-                nextWeekWeekend.EndDate = nextWeekWeekend.StartDate;
-                result.Add(nextWeekWeekend);
-                break;
-            }
-            result.Add(nextWeekWeekend);
+                StartDate = DateOnly.FromDateTime(searchDay),
+                EndDate = DateOnly.FromDateTime(searchDay)
+            });
+            searchDay = searchDay.AddDays(1);
+        }
+
+        if (allDate.Count > 1)
+        {
+            var i = 0;
+            do
+            {
+                var newStartDate = allDate[i].StartDate;
+                var newEndDate = newStartDate;
+                var potencialEndDates = allDate.Skip(i + 1).ToList();
+                potencialEndDates.ForEach(potencialEndDate =>
+                {
+                    if ((potencialEndDate.StartDate.ToDateTime(TimeOnly.MaxValue) - newEndDate.ToDateTime(TimeOnly.MaxValue)).TotalDays == 1)
+                    {
+                        newEndDate = potencialEndDate.EndDate;
+                        allDate.Remove(potencialEndDate);
+                    }
+                });
+                result.Add(new EventDateInterval()
+                {
+                    StartDate = newStartDate,
+                    EndDate = newEndDate
+                });
+                i++;
+            } while (i < allDate.Count);
+        } 
+        else
+        {
+            return allDate;
         }
 
         return result;
     }
 
-    public override IList<EventDateInterval> GetWeek()
-    {
-        var now = DateTime.Now;
-        var startDate = DateOnly.FromDateTime(now);
-        return new List<EventDateInterval>(){ new EventDateInterval()
-        {
-            StartDate = startDate,
-            EndDate = startDate.NearestDayOfWeek(DayOfWeek.Monday).AddDays(now.DayOfWeek == DayOfWeek.Monday ? 6 : -1),
-        }};
-    }
+
 }
