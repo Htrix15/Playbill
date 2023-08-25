@@ -1,13 +1,23 @@
-﻿using Playbill.Common;
+﻿using Microsoft.Extensions.Options;
+using Playbill.Common;
+using Playbill.Services.EventDateIntervals.Common;
 using Playbill.Services.EventDateIntervals.Common.Enums;
 using Playbill.Services.EventDateIntervals.Common.Exceptions;
 using Playbill.Services.EventDateIntervals.Common.Extensions;
 using Playbill.Services.EventDateIntervals.Common.Interfaces;
+using Playbill.Services.EventDateIntervals.Common.Options;
+using System.Xml.Serialization;
 
 namespace Playbill.Services.EventDateIntervals;
 
-internal class EventDateIntervalsService : IGetEventDateIntervals
+public class EventDateIntervalsService : IGetEventDateIntervals
 {
+    private readonly EventDateIntervalsOptions _eventDateIntervalsOptions;
+    public EventDateIntervalsService(IOptions<EventDateIntervalsOptions> eventDateIntervalsOptions)
+    {
+        _eventDateIntervalsOptions = eventDateIntervalsOptions.Value;
+    }
+
     private enum Direction
     {
         Raise,
@@ -45,7 +55,43 @@ internal class EventDateIntervalsService : IGetEventDateIntervals
     }
 
 
-    public IList<EventDateInterval> GetDateIntervals(HashSet<DayOfWeek> daysOfWeek, DatePeriods? datePeriods = null, DateOnly? startDate = null, DateOnly? endDate = null)
+    private async Task <List<EventDateInterval>> GetHolidaysIntervalsAsync(DateOnly minDate, DateOnly maxDate)
+    {
+        var holidays = new List<DateOnly>();
+        try
+        {
+            var httpClient = new HttpClient();
+            using var response = await httpClient.GetAsync(_eventDateIntervalsOptions.Request);
+            response.EnsureSuccessStatusCode();
+            var responseContent = await response.Content.ReadAsStringAsync();
+
+            var serializer = new XmlSerializer(typeof(HolidaysResponse));
+            HolidaysResponse holidaysResponse;
+            using var reader = new StringReader(responseContent);
+            holidaysResponse = (HolidaysResponse)serializer.Deserialize(reader);
+            holidays = holidaysResponse.OnlyHolidaysDays();
+        }
+        catch (Exception exception)
+        {
+            Console.WriteLine($"Fail call: {_eventDateIntervalsOptions.Request} Message : {exception.Message}");
+            holidays = _eventDateIntervalsOptions.MainHolidays.ToList();
+        }
+
+        return holidays
+            .Where(holiday => holiday >= minDate && holiday <= maxDate)
+            .Select(holiday => new EventDateInterval()
+            {
+                StartDate = holiday,
+                EndDate = holiday
+            })
+            .ToList();
+    }
+
+    public async Task<IList<EventDateInterval>> GetDateIntervalsAsync(HashSet<DayOfWeek> daysOfWeek, 
+        DatePeriods? datePeriods = null, 
+        DateOnly? startDate = null, 
+        DateOnly? endDate = null,
+        bool addHolidays = false)
     {
         if ((startDate.HasValue && !endDate.HasValue) || (!startDate.HasValue && endDate.HasValue))
         {
@@ -160,6 +206,12 @@ internal class EventDateIntervalsService : IGetEventDateIntervals
                 EndDate = DateOnly.FromDateTime(searchDay)
             });
             searchDay = searchDay.AddDays(1);
+        }
+
+        if (addHolidays)
+        {
+            allDate.AddRange(await GetHolidaysIntervalsAsync(DateOnly.FromDateTime(minDate), DateOnly.FromDateTime(maxDate)));
+            allDate = allDate.Distinct().OrderBy(date => date.StartDate).ToList();
         }
 
         if (allDate.Count > 1)

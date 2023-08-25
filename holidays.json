@@ -1,0 +1,7 @@
+{
+  "Holidays": {
+    "PathYearTerm": "{year}",
+    "Path": "http://xmlcalendar.ru/data/ru/{year}/calendar.xml",
+    "MainHolidays": [ "01.01", "01.07", "02.23", "03.08", "05.01", "05.09", "06.12", "11.04" ]
+  }
+}

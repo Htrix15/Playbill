@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Playbill.Billboards.Common.Options;
+using Playbill.Services.EventDateIntervals.Common.Options;
 using Playbill.Services.EventsGrouping;
 using Playbill.Services.ExportEvents.ToHtml;
 using Playbill.Services.TitleNormalization;
@@ -21,5 +22,6 @@ public static class Options
         services.Configure<PlaceSynonymsOptions>(configuration.GetSection("PlaceSynonyms"));
         services.Configure<ExportToHtmlOptions>(configuration.GetSection("ExportToHtml"));
         services.Configure<TitleNormalizationOptions>(configuration.GetSection("TitleNormalizationOptions"));
+        services.Configure<EventDateIntervalsOptions>(configuration.GetSection("Holidays"));
     }
 }

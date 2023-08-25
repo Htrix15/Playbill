@@ -11,6 +11,7 @@ public static class Configurations
             .AddJsonFile("place-synonyms.json", optional: false)
             .AddJsonFile("billboards.json", optional: false)
             .AddJsonFile("title-normalization-settings.json", optional: false)
+            .AddJsonFile("holidays.json", optional: false)
             .Build();
     }
 }

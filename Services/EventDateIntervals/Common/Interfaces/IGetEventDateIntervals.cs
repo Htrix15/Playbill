@@ -5,5 +5,9 @@ namespace Playbill.Services.EventDateIntervals.Common.Interfaces;
 
 public interface IGetEventDateIntervals
 {
-    IList<EventDateInterval> GetDateIntervals(HashSet<DayOfWeek> daysOfWeek, DatePeriods? datePeriods = null, DateOnly? startDate = null, DateOnly? endDate = null);
+    Task<IList<EventDateInterval>> GetDateIntervalsAsync(HashSet<DayOfWeek> daysOfWeek, 
+        DatePeriods? datePeriods = null, 
+        DateOnly? startDate = null, 
+        DateOnly? endDate = null,
+        bool addHolidays = false);
 }
