@@ -16,6 +16,5 @@ public abstract class BaseOptions
     /// </summary>
     public required int TryCount { get; set; }
     public string DateFormat { get; set; } = string.Empty;
-    public Dictionary<EventTypes, HashSet<string>>? ExcludeEventsNames { get; set; }
-    public HashSet<string>? ExcludePlacesNames { get; set; }
+
 }

@@ -7,7 +7,7 @@ public static class Configurations
     public static IConfigurationRoot Configure()
     {
         return new ConfigurationBuilder()
-            .AddJsonFile("appsettings.json", optional: false)
+            .AddJsonFile("search-options.json", optional: false)
             .AddJsonFile("place-synonyms.json", optional: false)
             .AddJsonFile("billboards.json", optional: false)
             .AddJsonFile("title-normalization-settings.json", optional: false)

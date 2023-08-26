@@ -5,12 +5,7 @@ namespace Playbill.Services.EventsGrouping;
 
 public class EventsGroupingService
 {
-    private readonly List<PlaceSynonyms> _synonyms;
     private const string _subscription = "абонемент";
-    public EventsGroupingService(IOptions<PlaceSynonymsOptions> synonyms)
-    {
-        _synonyms = synonyms.Value?.Synonyms ?? new List<PlaceSynonyms>();
-    }
 
     private List<Event> EventDatePreparation(List<Event> events)
     {
@@ -88,11 +83,6 @@ public class EventsGroupingService
         return events;
     }
 
-    private void EventPlacePreparation(List<Event> events)
-    {
-        events.ForEach(@event => _synonyms.ForEach(synonyms => synonyms.SetPlaceName(@event)));
-    }
-
     private bool TitleCompare(Event event1, Event event2)
     {
         if (string.Equals(event1.NormilizeTitle, event2.NormilizeTitle)) return true;
@@ -168,8 +158,6 @@ public class EventsGroupingService
     public IList<Event> EventsGrouping(IList<Event> events)
     {
         var _events = EventDatePreparation(events.ToList());
-
-        EventPlacePreparation(_events);
 
         var result = new List<Event>();
 

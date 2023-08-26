@@ -18,11 +18,16 @@ public class Service : PageParseService
 
     public override async Task<IList<Event>> GetEventsAsync(IList<EventDateInterval> eventDateIntervals, HashSet<EventTypes>? searchEventTypes = null)
     {
+        var result = new List<Event>();
+
+        if (!searchEventTypes.Contains(EventTypes.Unidentified))
+        {
+            return result;
+        }
+
         var options = (_options as Options);
         var baseSearchUrl = options.BaseSearchUrl;
         var baseLinkUrl = options.BaseLinkUrl;
-
-        var result = new List<Event>();
 
         try
         {

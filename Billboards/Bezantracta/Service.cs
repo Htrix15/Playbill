@@ -98,7 +98,6 @@ public class Service : PageParseService
             }
         }
 
-
         result = result.DateGrouping().ToList();
         return result;
     }

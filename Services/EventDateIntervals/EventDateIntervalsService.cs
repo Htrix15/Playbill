@@ -88,7 +88,7 @@ public class EventDateIntervalsService : IGetEventDateIntervals
     }
 
     public async Task<IList<EventDateInterval>> GetDateIntervalsAsync(HashSet<DayOfWeek> daysOfWeek, 
-        DatePeriods? datePeriods = null, 
+        DatePeriods? datePeriod = null, 
         DateOnly? startDate = null, 
         DateOnly? endDate = null,
         bool addHolidays = false)
@@ -98,7 +98,7 @@ public class EventDateIntervalsService : IGetEventDateIntervals
             throw new Exception("Invalid input options. Check: " + (startDate.HasValue ? "endDate" : "startDate"));
         }
 
-        if (!startDate.HasValue && !endDate.HasValue && !datePeriods.HasValue)
+        if (!startDate.HasValue && !endDate.HasValue && !datePeriod.HasValue)
         {
             throw new Exception("Invalid input options. Check: datePeriods, endDate, startDate");
         }
@@ -129,9 +129,9 @@ public class EventDateIntervalsService : IGetEventDateIntervals
             maxDate = endDate.Value.ToDateTime(TimeOnly.MaxValue);
         }
 
-        if (datePeriods.HasValue && !(startDate.HasValue && endDate.HasValue))
+        if (datePeriod.HasValue && !(startDate.HasValue && endDate.HasValue))
         {
-            minDate = datePeriods switch
+            minDate = datePeriod switch
             {
                 DatePeriods.ThisWeek => minDate,
                 DatePeriods.NextWeek => minDate.NearestDayOfWeek(DayOfWeek.Monday).AddDays(minDate.DayOfWeek == DayOfWeek.Monday ? 7 : 0),
@@ -141,7 +141,7 @@ public class EventDateIntervalsService : IGetEventDateIntervals
                 _ => throw new NotImplementedException(),
             };
 
-            maxDate = datePeriods switch
+            maxDate = datePeriod switch
             {
                 DatePeriods.ThisWeek => minDate.NearestDayOfWeek(DayOfWeek.Monday).AddDays(minDate.DayOfWeek == DayOfWeek.Monday ? 6 : -1),
                 DatePeriods.NextWeek => minDate.AddDays(6),

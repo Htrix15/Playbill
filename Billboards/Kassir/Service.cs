@@ -65,7 +65,7 @@ public class Service : ApiService<int>
                             var respons = responseJson.ParseJson<Response>();
                             convertToEventSetting.EstimatedDate = searchDate;
                             var events = respons.ConvertToEvents(convertToEventSetting);
-                            result.AddRange(FilterEvents(events));
+                            result.AddRange(events);
                         }
                         searchDate = searchDate.AddDays(1);
                     } while (searchDate <= eventDateInterval.EndDate);

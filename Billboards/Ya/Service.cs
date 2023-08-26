@@ -75,7 +75,7 @@ public class Service : ApiService<string>
                                 getData = true;
                             }
                             var events = respons.ConvertToEvents(convertToEventSetting);
-                            result.AddRange(FilterEvents(events));
+                            result.AddRange(events);
                         }
                     } while (getData);
                 }

@@ -1,22 +1,15 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Playbill.Infrastructure.Configure;
-using Playbill.Services.EventDateIntervals;
-using Playbill.Services.EventsGrouping;
+using Playbill.Services;
 using Playbill.Services.ExportEvents.ToHtml;
-using Playbill.Services.LoadEvents;
-using DatePeriods = Playbill.Services.EventDateIntervals.Common.Enums.DatePeriods;
 
 var services = Services.Configure();
 var configuration = Configurations.Configure();
 Options.Configure(services, configuration);
 
 using var serviceProvider = services.BuildServiceProvider();
-var intervals = await serviceProvider.GetService<EventDateIntervalsService>()
-    .GetDateIntervalsAsync(new HashSet<DayOfWeek>() { DayOfWeek.Saturday, DayOfWeek.Sunday },
-    DatePeriods.ThisYear,
-    addHolidays: true);
-var events = await serviceProvider.GetService<LoadEventsService>().GetEventsAsync(intervals);
-events = serviceProvider.GetService<EventsGroupingService>().EventsGrouping(events);
+
+var events = await serviceProvider.GetService<MainService>().GetEvents(new Playbill.Common.SearchOptions.SearchOptions());
 await serviceProvider.GetService<ExportToHtmlService>().ExportAync(events);
 
 

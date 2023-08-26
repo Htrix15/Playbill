@@ -17,7 +17,7 @@ public class Service : PageParseService
 
     public override BillboardTypes BillboardType => BillboardTypes.Eventhall;
 
-    public override async Task<IList<Event>> GetEventsAsync(IList<EventDateInterval> eventDateIntervals, HashSet<EventTypes>? searchEventTypes = null)
+    public override async Task<IList<Event>> GetEventsAsync(IList<EventDateInterval> eventDateIntervals, HashSet<EventTypes> searchEventTypes)
     {
         var options = (_options as Options);
 

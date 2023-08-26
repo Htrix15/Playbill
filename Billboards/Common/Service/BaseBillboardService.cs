@@ -19,22 +19,5 @@ public abstract class BaseBillboardService: IBillboardService
         _titleNormalizationService = titleNormalizationService;
     }
 
-    public abstract Task<IList<Event>> GetEventsAsync(IList<EventDateInterval> eventDateIntervals, HashSet<EventTypes>? searchEventTypes = null);
-
-    protected IList<Event> FilterEvents(IList<Event> events) =>
-        events.Where(@event =>
-        {
-            var validPlace = (!(_options.ExcludePlacesNames?.Contains(@event.Place, StringComparer.CurrentCultureIgnoreCase)) ?? true);
-            var now = DateTime.Now;
-            var nowDateOnly = new DateOnly(now.Year, now.Month, now.Day);
-            var validTime = (@event.Dates is null && @event.EstimatedDates is not null)
-                || (@event.Dates is not null && @event.Dates.Any(date => date > now))
-                || (@event.EstimatedDates is not null && @event.EstimatedDates.Any(date => date > nowDateOnly));
-            var validName = true;
-            if (_options.ExcludeEventsNames?.TryGetValue(@event.Type, out var excludeNames) ?? false)
-            {
-                validName = excludeNames.Any(name => @event.Title?.Contains(name) ?? true);
-            }
-            return validPlace && validName && validTime;
-        }).ToList();
+    public abstract Task<IList<Event>> GetEventsAsync(IList<EventDateInterval> eventDateIntervals, HashSet<EventTypes> searchEventTypes);
 }
