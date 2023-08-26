@@ -37,8 +37,10 @@ public class Response: IConvertToEvent<int>
                     }
                     else if (item.Object?.DateRange.EndsAt.Value.Date == estimatedDate)
                     {
-                        date = item.Object?.DateRange.EndsAt.Value.AddHours(setting?.TimeOffset ?? 0);
-                    } else
+                        var endsDate = item.Object.DateRange.EndsAt.Value;
+                        date = new DateTime(endsDate.Year, endsDate.Month, endsDate.Day);
+                    }
+                    else
                     {
                         date = estimatedDate;
                         estimateDate = true;
