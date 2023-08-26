@@ -1,0 +1,7 @@
+{
+  "ExportToHtml": {
+    "OutputFolder": "D:\\Events",
+    "CssFilePath": "./Services/ExportEvents/ToHtml/style.css",
+    "OutputHtmlFileName": "index.html"
+  }
+}
