@@ -19,7 +19,27 @@ public class Response : IConvertToEvent<string>
             try
             {
                 var eventType = setting.EventType;
-                var date = item.ScheduleInfo.Regularity?.SingleShowtime ?? DateTime.Parse(item.ScheduleInfo.DateStarted);
+                var date = new List<DateTime>();
+                if (item.ScheduleInfo.Regularity?.SingleShowtime != null)
+                {
+                    date.Add(item.ScheduleInfo.Regularity.SingleShowtime.Value);
+                }
+                else if ((item.ScheduleInfo.Dates?.Any() ?? false) && (item.ScheduleInfo.Regularity?.Daily?.Any() ?? false))
+                {
+                    item.ScheduleInfo.Dates.ForEach(scheduleInfoDate =>
+                    {
+                        var eventDate = DateOnly.Parse(scheduleInfoDate);
+                        item.ScheduleInfo.Regularity.Daily.ForEach(time =>
+                        {
+                            var eventTime = TimeOnly.Parse(time);
+                            date.Add(new DateTime(eventDate.Year, eventDate.Month, eventDate.Day, eventTime.Hour, eventTime.Minute, 0));
+                        });
+                    });      
+                }
+                else
+                {
+                    date.Add(DateTime.Parse(item.ScheduleInfo.DateStarted));
+                }
                 var title = item.@Event.Title;
                 var imagePath = item.@Event.PromoImage2?.PreviewL?.Url
                     ?? item.@Event.PromoImage2?.PreviewM?.Url
@@ -40,7 +60,7 @@ public class Response : IConvertToEvent<string>
                 {
                     Billboard = Playbill.Common.BillboardTypes.Ya,
                     Type = eventType,
-                    Dates = new List<DateTime>() { date },
+                    Dates = date,
                     Title = title,
                     ImagePath = imagePath,
                     Place = place,
@@ -408,7 +428,7 @@ public class Response : IConvertToEvent<string>
     {
         public bool IsRegular { get; set; }
         public DateTime? SingleShowtime { get; set; }
-        public List<object> Daily { get; set; }
+        public List<string> Daily { get; set; }
         public List<object> Weekly { get; set; }
     }
 

@@ -1,5 +1,4 @@
-﻿using System.Text.RegularExpressions;
-
+﻿
 namespace Playbill.Common.Event;
 
 public class Event
@@ -8,6 +7,7 @@ public class Event
     public required EventTypes Type { get; set; }
     public required List<DateTime>? Dates { get; set; }
     public DateTime? Date => Dates?.FirstOrDefault();
+    public List<TimeOnly>? Sessions { get; set; }
     public List<DateOnly>? EstimatedDates { get; set; }
     public required string? Title { get; set; }
     public string NormilizeTitle { get; set; }

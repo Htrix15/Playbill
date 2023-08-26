@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Options;
-using Playbill.Common.Event;
+﻿using Playbill.Common.Event;
 
 namespace Playbill.Services.EventsGrouping;
 
@@ -15,20 +14,33 @@ public class EventsGroupingService
         {
             if (@event.Dates?.Count > 1)
             {
-                @event.Dates.Skip(1).ToList().ForEach(date => eventsWithAlternativeDate.Add(
-                    new Event()
-                    {
-                        Billboard = @event.Billboard,
-                        Type = @event.Type,
-                        Dates = new List<DateTime>() { date },
-                        Title = @event.Title,
-                        NormilizeTitle = @event.NormilizeTitle,
-                        NormilizeTitleTerms = @event.NormilizeTitleTerms,
-                        ImagePath = @event.ImagePath,
-                        Place = @event.Place,
-                        Links = @event.Links
-                    }));
-                @event.Dates = @event.Dates.Take(1).ToList();
+                var dates = @event.Dates.DistinctBy(date => date.Date).ToList();
+                var sessionsGroup = @event.Dates.GroupBy(date => date.Date).ToList();
+
+                dates.Skip(1).ToList().ForEach(date => {
+                    var sessions = sessionsGroup.First(group => group.Key == date.Date).Select(date => new TimeOnly(date.Hour, date.Minute, date.Second)).ToList();
+                    var hasSessions = sessions.Count > 1;
+                    eventsWithAlternativeDate.Add(
+                        new Event()
+                        {
+                            Billboard = @event.Billboard,
+                            Type = @event.Type,
+                            Dates = new List<DateTime>() { hasSessions ? date.Date : date  },
+                            Sessions = hasSessions ? sessions : null,
+                            Title = @event.Title,
+                            NormilizeTitle = @event.NormilizeTitle,
+                            NormilizeTitleTerms = @event.NormilizeTitleTerms,
+                            ImagePath = @event.ImagePath,
+                            Place = @event.Place,
+                            Links = @event.Links
+                        });
+                    });
+
+                var sessions = sessionsGroup.First(group => group.Key == @event.Date.Value.Date).Select(date => new TimeOnly(date.Hour, date.Minute, date.Second)).ToList();
+                var hasSessions = sessions.Count > 1;
+                var fiestdate = @event.Dates.First();
+                @event.Dates = new List<DateTime>() { hasSessions ? fiestdate.Date : fiestdate };
+                @event.Sessions = hasSessions ? sessions : null;
             }
             if (@event.EstimatedDates?.Count > 1)
             {

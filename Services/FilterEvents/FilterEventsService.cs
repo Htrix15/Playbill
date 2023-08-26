@@ -20,7 +20,7 @@ public class FilterEventsService
         events.Where(@event =>
         {
             _synonyms.ForEach(synonyms => synonyms.SetPlaceName(@event));
-            var validPlace = excludePlacesTerms.All(excludePlacesTerm => !@event.Place.Contains(excludePlacesTerm, StringComparison.CurrentCultureIgnoreCase)) 
+            var validPlace = !excludePlacesTerms.Any(excludePlacesTerm => @event.Place.Contains(excludePlacesTerm, StringComparison.CurrentCultureIgnoreCase)) 
                 && ((allPlaces ?? false) || inclidePlaces.Any(inclidePlace => @event.Place.Contains(inclidePlace, StringComparison.CurrentCultureIgnoreCase)));
             var now = DateTime.Now;
             var nowDateOnly = new DateOnly(now.Year, now.Month, now.Day);

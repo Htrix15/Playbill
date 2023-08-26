@@ -45,7 +45,9 @@ public class ExportToHtmlService : IExportEvents
                 """);
 
                 var dateMask = @event.Date!.Value.Hour != 0 ? "dd MMMM HH:mm (dddd)" : "dd MMMM (dddd)";
-
+                var times = @event.Sessions?.Any() ?? false
+                    ? $"({string.Join(", ", @event.Sessions.Select(session => session.ToString("HH:mm")))})"
+                    : "";
                 html += $"""
                         <div class="event event-{@event.Type.ToString().ToLower()}">
                             <div class="img-wrapper">
@@ -53,7 +55,7 @@ public class ExportToHtmlService : IExportEvents
                             </div>
                             <div class="info">
                                 <h2>{@event.Title}</h2>
-                                <p><b>{@event.Date.Value.ToString(dateMask)}</b></p>
+                                <p><b>{@event.Date.Value.ToString(dateMask)}</b> {times}</p>
                                 <span>{@event.Place}</span>
                             </div>
                             <div class="buttons">
