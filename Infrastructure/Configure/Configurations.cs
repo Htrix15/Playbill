@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 
-namespace Playbill.Infrastructure.Configure;
+namespace Infrastructure.Configure;
 
 public static class Configurations
 {

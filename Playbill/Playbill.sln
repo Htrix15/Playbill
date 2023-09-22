@@ -3,13 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33829.357
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Playbill", "Playbill.csproj", "{95303F21-7EE8-4E0F-A29A-C921B3B98D84}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp", "ConsoleApp.csproj", "{95303F21-7EE8-4E0F-A29A-C921B3B98D84}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DbSqlite", "..\DbSqlite\DbSqlite.csproj", "{3D51D2F0-831F-44B8-9054-E9E68EF4076B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DbSqlite", "..\DbSqlite\DbSqlite.csproj", "{3D51D2F0-831F-44B8-9054-E9E68EF4076B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Models", "..\Models\Models.csproj", "{A9BDEF95-F11E-494C-95E6-ED0777B1BE76}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Models", "..\Models\Models.csproj", "{A9BDEF95-F11E-494C-95E6-ED0777B1BE76}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Repository", "..\Repository\Repository.csproj", "{3DD2104A-328B-407D-8B2E-246872F35FAF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Repository", "..\Repository\Repository.csproj", "{3DD2104A-328B-407D-8B2E-246872F35FAF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TelegramBot", "..\TelegramBot\TelegramBot.csproj", "{9A13F7A5-319A-415D-A96E-54B7DEC15F7B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "..\Infrastructure\Infrastructure.csproj", "{79FC5B2E-EFC4-49B1-8F98-F437CD2AB89A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +37,14 @@ Global
 		{3DD2104A-328B-407D-8B2E-246872F35FAF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3DD2104A-328B-407D-8B2E-246872F35FAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3DD2104A-328B-407D-8B2E-246872F35FAF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9A13F7A5-319A-415D-A96E-54B7DEC15F7B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9A13F7A5-319A-415D-A96E-54B7DEC15F7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9A13F7A5-319A-415D-A96E-54B7DEC15F7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9A13F7A5-319A-415D-A96E-54B7DEC15F7B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{79FC5B2E-EFC4-49B1-8F98-F437CD2AB89A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{79FC5B2E-EFC4-49B1-8F98-F437CD2AB89A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{79FC5B2E-EFC4-49B1-8F98-F437CD2AB89A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{79FC5B2E-EFC4-49B1-8F98-F437CD2AB89A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
