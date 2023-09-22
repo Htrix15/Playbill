@@ -2,11 +2,10 @@
 using Microsoft.Extensions.DependencyInjection;
 using Models.Search;
 using Models.ProcessingServices.EventDateIntervals.Common.Options;
-using Models.ProcessingServices.ExportEvents.ToHtml;
 using Models.ProcessingServices.TitleNormalization;
 using Billboards = Models.Billboards;
 
-namespace Playbill.Infrastructure.Configure;
+namespace Infrastructure.BaseConfigure;
 
 public static class Options
 {
@@ -19,7 +18,6 @@ public static class Options
         services.Configure<Billboards.Quickticket.Options>(configuration.GetSection("Quickticket"));
         services.Configure<Billboards.Eventhall.Options>(configuration.GetSection("Eventhall"));
         services.Configure<Billboards.Ticketvrn.Options>(configuration.GetSection("Ticketvrn"));
-        services.Configure<ExportToHtmlOptions>(configuration.GetSection("ExportToHtml"));
         services.Configure<TitleNormalizationOptions>(configuration.GetSection("TitleNormalizationOptions"));
         services.Configure<EventDateIntervalsOptions>(configuration.GetSection("Holidays"));
     }

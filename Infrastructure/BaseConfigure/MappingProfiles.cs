@@ -2,7 +2,7 @@
 using Models.Places;
 using Models.Search;
 
-namespace Playbill.Infrastructure.Configure;
+namespace Infrastructure.BaseConfigure;
 
 public static class MappingProfiles
 {

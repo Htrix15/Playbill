@@ -39,9 +39,6 @@
     <None Update="billboards.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="export-to-html-settings.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="holidays.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

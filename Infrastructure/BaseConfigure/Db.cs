@@ -1,9 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Models.Places;
 using Repository;
 
-namespace Playbill.Infrastructure.Configure;
+namespace Infrastructure.BaseConfigure;
 
 public static class Db
 {

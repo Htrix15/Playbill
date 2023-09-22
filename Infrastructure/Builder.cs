@@ -1,18 +1,69 @@
-﻿using Infrastructure.Configure;
+﻿using Infrastructure.BaseConfigure;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Playbill.Infrastructure.Configure;
 
 namespace Infrastructure;
 
 public class Builder
 {
-    public static IServiceCollection Build()
+
+    private static void AddCustom(List<Action<ServiceCollection>>? actions, ServiceCollection services)
     {
-        var services = Services.Configure();
-        MappingProfiles.Configure(services);
-        var configuration = Configurations.Configure();
-        Options.Configure(services, configuration);
+        if (actions is not null && actions.Any())
+        {
+            actions.ForEach(addService =>
+            {
+                addService.Invoke(services);
+            });
+        }
+    }
+
+    private static void AddCustom<T>(List<Action<ServiceCollection, T>>? actions, ServiceCollection services, T options)
+    {
+        if (actions is not null && actions.Any())
+        {
+            actions.ForEach(addService =>
+            {
+                addService.Invoke(services, options);
+            });
+        }
+    }
+
+    private static void AddCustomConfiguration(List<(string File, bool Optional)>? customConfigurations, ConfigurationBuilder configurationBuilder)
+    {
+        if (customConfigurations is not null && customConfigurations.Any())
+        {
+            customConfigurations.ForEach(config =>
+            {
+                configurationBuilder.AddJsonFile(config.File, optional: config.Optional);
+            });
+        }
+    }
+
+    public static IServiceCollection GetServiceCollection(
+        List<Action<ServiceCollection>>? customServices = null,
+        List<(string File, bool Optional)>? customConfigurations = null,
+        List<Action<ServiceCollection, IConfigurationRoot>>? customOptions = null,
+        List<Action<ServiceCollection>>? customDb = null,
+        List<Action<ServiceCollection>>? customMapping = null)
+    {
+        var services = Services.GetCollection();
+        AddCustom(customServices, services);
+
+        var configuration = Configurations.GetBuilder();
+        AddCustomConfiguration(customConfigurations, configuration);
+
+        var configurationRoot = configuration.Build();
+
+        Options.Configure(services, configurationRoot);
+        AddCustom(customOptions, services, configurationRoot);
+
         Db.Configure(services);
+        AddCustom(customDb, services);
+
+        MappingProfiles.Configure(services);
+        AddCustom(customMapping, services);
+
         return services;
     }
 }

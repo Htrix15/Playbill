@@ -4,20 +4,21 @@ using Models.Places;
 using Models.ProcessingServices;
 using Models.ProcessingServices.EventDateIntervals;
 using Models.ProcessingServices.EventsGrouping;
-using Models.ProcessingServices.ExportEvents.ToHtml;
 using Models.ProcessingServices.FilterEvents;
 using Models.ProcessingServices.LoadEvents;
 using Models.ProcessingServices.TitleNormalization;
 using Models.ProcessingServices.TitleNormalization.Common;
 using Billboards = Models.Billboards;
 
-namespace Playbill.Infrastructure.Configure;
+namespace Infrastructure.BaseConfigure;
 
 public static class Services
 {
-    public static IServiceCollection Configure()
+    public static ServiceCollection GetCollection()
     {
-        return new ServiceCollection()
+        var services = new ServiceCollection();
+
+        services
             .AddTransient<MainService>()
             .AddTransient<PlacesService>()
             .AddTransient<EventDateIntervalsService>()
@@ -31,7 +32,8 @@ public static class Services
             .AddTransient<IBillboardService, Billboards.Ticketvrn.Service>()
             .AddTransient<FilterEventsService>()
             .AddTransient<EventsGroupingService>()
-            .AddTransient<ExportToHtmlService>()
         ;
+
+        return services;
     }
 }
