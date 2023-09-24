@@ -19,11 +19,11 @@ public class TitleNormalizationService: ITitleNormalization
 
     const string NormilizeTitlePattern = "(?i)[^А-ЯЁA-Z0-9]";
 
-    public string TitleNormalization(string title) => Regex.Replace(title ?? "", NormilizeTitlePattern, "").ToLower();
+    public string TitleNormalization(string title) => Regex.Replace(title ?? "", NormilizeTitlePattern, "").ToLower().Replace("ё","е");
 
     private Func<string, List<string>, int, string> TermNormalization = (string term, List<string> wordEndings, int maxSizeForNotWordEndingsRemoveing) =>
     {
-        term = Regex.Replace(term, NormilizeTitlePattern, "");
+        term = Regex.Replace(term, NormilizeTitlePattern, "").Replace("ё", "е");
         if (term.Length <= maxSizeForNotWordEndingsRemoveing)
         {
             return term;
