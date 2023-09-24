@@ -44,6 +44,7 @@ public class Builder
         List<Action<ServiceCollection>>? customServices = null,
         List<(string File, bool Optional)>? customConfigurations = null,
         List<Action<ServiceCollection, IConfigurationRoot>>? customOptions = null,
+        List<Action<ServiceCollection, IConfigurationRoot>>? customServicesWithOptions = null,
         List<Action<ServiceCollection>>? customDb = null,
         List<Action<ServiceCollection>>? customMapping = null)
     {
@@ -57,6 +58,8 @@ public class Builder
 
         Options.Configure(services, configurationRoot);
         AddCustom(customOptions, services, configurationRoot);
+
+        AddCustom(customServicesWithOptions, services, configurationRoot);
 
         Db.Configure(services);
         AddCustom(customDb, services);
