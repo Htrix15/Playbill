@@ -4,7 +4,7 @@ using Models.ProcessingServices.EventDateIntervals.Common.Enums;
 
 namespace Models.Search;
 
-public class SearchOptions
+public class SearchOptions : ICloneable
 {
     public HashSet<BillboardTypes>? SupportedBillboards { get; set; }
     public HashSet<EventTypes>? SearchEventTypes { get; set; }
@@ -19,4 +19,9 @@ public class SearchOptions
     public bool? AddHolidays { get; set; }
     public DateOnly? StartDate { get; set; }
     public DateOnly? EndDate { get; set; }
+
+    public object Clone()
+    {
+        return this.MemberwiseClone();
+    }
 }

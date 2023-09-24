@@ -7,13 +7,12 @@ using Models.ProcessingServices.EventsGrouping;
 using Models.ProcessingServices.FilterEvents;
 using Models.ProcessingServices.LoadEvents;
 using Models.Places;
-using System.Text.RegularExpressions;
 
 namespace Models.ProcessingServices;
 
 public class MainService
 {
-    private SearchOptions _searchOptions;
+    private readonly SearchOptions _searchOptions;
 
     private readonly IMapper _mapper;
 
@@ -40,35 +39,37 @@ public class MainService
         _placesService = placesService;
     }
 
-    private void OverlayOptions(SearchOptions userSearchOptions)
+    private SearchOptions OverlayOptions(SearchOptions userSearchOptions)
     {
-        _mapper.Map(userSearchOptions, _searchOptions);
+       return _mapper.Map(userSearchOptions, _searchOptions.Clone() as SearchOptions);
     }
 
-    public async Task<IList<Event>> GetEvents(SearchOptions userSearchOptions)
+    public async Task<IList<Event>> GetEvents(SearchOptions userSearchOptions, bool overlayOptions = false)
     {
         var places = await _placesService.GetPlacesAsync();
         var placesSynonyms = _placesService.GetPlaceSynonyms(places);
-
-        OverlayOptions(userSearchOptions);
+        
+        if (overlayOptions) { 
+            userSearchOptions = OverlayOptions(userSearchOptions);
+        }
 
         var intervals = await _eventDateIntervalsService
-            .GetDateIntervalsAsync(_searchOptions.DaysOfWeek!,
-            _searchOptions!.DatePeriod,
-            _searchOptions.StartDate,
-            _searchOptions.EndDate,
-            _searchOptions.AddHolidays ?? false);
+            .GetDateIntervalsAsync(userSearchOptions.DaysOfWeek!,
+            userSearchOptions!.DatePeriod,
+            userSearchOptions.StartDate,
+            userSearchOptions.EndDate,
+            userSearchOptions.AddHolidays ?? false);
 
-        var events = await _loadEventsService.GetEventsAsync(_searchOptions.SupportedBillboards!, 
-            intervals, 
-            _searchOptions.SearchEventTypes!);
+        var events = await _loadEventsService.GetEventsAsync(userSearchOptions.SupportedBillboards!, 
+            intervals,
+            userSearchOptions.SearchEventTypes!);
 
         _placesService.ReplacePlaceToSynonyms(events, placesSynonyms);
 
-        events = _filterEventsService.FilterEvents(events, _searchOptions.AllPlaces, 
-            _searchOptions.ExcludePlacesTerms!,
-            places.Select(p => p.Name).ToHashSet(), 
-            _searchOptions.ExcludeEventsNamesTerms);
+        events = _filterEventsService.FilterEvents(events, userSearchOptions.AllPlaces,
+            userSearchOptions.ExcludePlacesTerms!,
+            places.Select(p => p.Name).ToHashSet(),
+            userSearchOptions.ExcludeEventsNamesTerms);
 
         events = _eventsGroupingService.EventsGrouping(events);
 

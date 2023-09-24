@@ -28,6 +28,9 @@
     <None Update="export-to-html-settings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="ExportToHtml\style.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="PlaybillApp.db">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

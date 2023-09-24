@@ -1,6 +1,4 @@
-﻿
-
-namespace Models.ProcessingServices.ExportEvents.ToHtml;
+﻿namespace ConsoleApp.ExportToHtml;
 
 public class ExportToHtmlOptions
 {

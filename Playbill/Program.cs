@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Models.Search;
 using Models.ProcessingServices;
-using Models.ProcessingServices.ExportEvents.ToHtml;
 using Infrastructure;
 using Microsoft.Extensions.Configuration;
+using ConsoleApp.ExportToHtml;
 
 var customServices = new List<Action<ServiceCollection>>()
 {
@@ -28,6 +28,11 @@ using var serviceProvider = Builder
     )
     .BuildServiceProvider();
 
-var events = await serviceProvider.GetService<MainService>().GetEvents(new SearchOptions());
-await serviceProvider.GetService<ExportToHtmlService>().ExportAync(events);
+var events = await serviceProvider.GetService<MainService>()!.GetEvents(new SearchOptions()
+    {
+        DatePeriod = Models.ProcessingServices.EventDateIntervals.Common.Enums.DatePeriods.ThisMonth
+    }, 
+    overlayOptions: true
+);
+await serviceProvider.GetService<ExportToHtmlService>()!.ExportAync(events);
 

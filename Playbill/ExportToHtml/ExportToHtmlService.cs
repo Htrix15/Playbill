@@ -1,10 +1,9 @@
 ﻿using Microsoft.Extensions.Options;
 using Models.Events;
-using Models.ProcessingServices.ExportEvents.Common.Interfaces;
 
-namespace Models.ProcessingServices.ExportEvents.ToHtml;
+namespace ConsoleApp.ExportToHtml;
 
-public class ExportToHtmlService : IExportEvents
+public class ExportToHtmlService
 {
     private readonly ExportToHtmlOptions _options;
     public ExportToHtmlService(IOptions<ExportToHtmlOptions> exportToHtmlOptions)
@@ -64,7 +63,7 @@ public class ExportToHtmlService : IExportEvents
                         </div>
                 """;
             }
-            catch(Exception exception)
+            catch (Exception exception)
             {
                 Console.WriteLine($"Fail create html event: {exception.Message}");
             }
@@ -82,9 +81,9 @@ public class ExportToHtmlService : IExportEvents
             await outputFile.WriteLineAsync(html);
         }
 
-        File.Copy(_options.CssFilePath, 
-            Path.Combine(_options.OutputFolder, 
-            Path.GetFileName(_options.CssFilePath)), 
+        File.Copy(_options.CssFilePath,
+            Path.Combine(_options.OutputFolder,
+            Path.GetFileName(_options.CssFilePath)),
             true);
     }
 }
