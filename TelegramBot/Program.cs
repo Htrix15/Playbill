@@ -22,7 +22,8 @@ var customServices = new List<Action<ServiceCollection>>()
     services => services.AddScoped<MessageService>(),
     services => services.AddScoped<MarkupService>(),
     services => services.AddScoped<EventService>(),
-    services => services.AddScoped<UserSettingsService>()
+    services => services.AddScoped<UserSettingsService>(),
+    services => services.AddScoped<MessageActionsService>()
 };
 
 var customConfigurations = new List<(string File, bool Optional)>()

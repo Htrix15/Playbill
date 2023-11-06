@@ -6,172 +6,27 @@ using Telegram.Bot.Exceptions;
 using TelegramBot.Services;
 using TelegramBot.Params;
 using Models.ProcessingServices.EventDateIntervals.Common.Enums;
+using TelegramBot.Handlers.Actions.Common;
 
 namespace TelegramBot.Handles;
 
 public class UpdateHandler : IUpdateHandler
 {
     private readonly MessageService _messageService;
-    private readonly UserSettingsService _userSettingsService;
-    private readonly EventService _eventService;
-    private readonly Dictionary<string, Func<BaseParams, Task>> _messageActions;
-    private readonly Dictionary<string, Func<UpdateUserSettingsParams, Task>> _updateSettingsActions;
+    private readonly MessageActionsService _messageActionsService;
 
-    private readonly List<string> _getEventsKeys = new List<string>()
-    {
-         Commands.ThisWeek, Commands.NextWeek, Commands.ThisMonth, Commands.Next30Days, Commands.ThisYear,
-    };
-    private readonly List<string> _settingsKeys = new List<string>()
-    {
-         Commands.Billboards, Commands.EventTypes, Commands.DaysOfWeek, Commands.Places, Commands.AddHolidays,
-    };
+    private readonly Dictionary<string, IActionMessage> _messageActions;
+    private readonly List<string> _getEventsKeys = new();
+    private readonly List<string> _settingsKeys = new();
 
-    private Func<BaseParams, GetEventsParams, Task> GetEvents => async (BaseParams messageParams, GetEventsParams getEventsParams) =>
-    {
-        await _messageService.GetStartSearchMessageAsync(new MessageParams()
-        {
-            ChatId = messageParams.ChatId
-        });
-
-        var events = await _eventService.GetEvents(getEventsParams);
-        var eventsMessagesParams = new EventsMessagesParams()
-        {
-            ChatId = messageParams.ChatId,
-            Events = events
-        };
-        await _messageService.GetEventMessagesAsync(eventsMessagesParams);
-    };
-
-    public UpdateHandler(MessageService messageService, EventService eventService, UserSettingsService userSettingsService)
+    public UpdateHandler(MessageService messageService, 
+        MessageActionsService messageActionsService)
     {
         _messageService = messageService;
-        _eventService = eventService;
-        _userSettingsService = userSettingsService;
-        _messageActions = new Dictionary<string, Func<BaseParams, Task>>()
-        {
-            { 
-                Commands.Start, 
-                messageParams => _messageService.GetStartMessageAsync(messageParams as MessageParams) 
-            },
-            {
-                Commands.Search,
-                messageParams => _messageService.GetSearchDatePeriodsMessageAsync(messageParams as MessageParams)
-            },
-            {
-                Commands.Settings,
-                messageParams => _messageService.GetSettingsMessageAsync(messageParams as MessageParams)
-            },
-            {
-                Commands.Billboards,
-                async messageParams => {
-                    var userSettingsParams = messageParams as UserSettingsParams;
-                    var settings = await _userSettingsService.GetUserBillboardsSettingsAsync(userSettingsParams.UserId);
-                    userSettingsParams.Settings = settings;
-                    await _messageService.GetSettingsListMessageAsync(userSettingsParams, $"{Commands.Billboards.TrimStart('/')}_");
-                }
-            },
-            {
-                Commands.EventTypes,
-                async messageParams => {
-                    var userSettingsParams = messageParams as UserSettingsParams;
-                    var settings = await _userSettingsService.GetUserEventTypesSettingsAsync(userSettingsParams.UserId);
-                    userSettingsParams.Settings = settings;
-                    await _messageService.GetSettingsListMessageAsync(userSettingsParams,  $"{Commands.EventTypes.TrimStart('/')}_");
-                }
-            },
-            {
-                Commands.DaysOfWeek,
-                async messageParams => {
-                    var userSettingsParams = messageParams as UserSettingsParams;
-                    var settings = await _userSettingsService.GetUserDaysOfWeekSettingsAsync(userSettingsParams.UserId);
-                    userSettingsParams.Settings = settings;
-                    await _messageService.GetSettingsListMessageAsync(userSettingsParams,  $"{Commands.DaysOfWeek.TrimStart('/')}_");
-                }
-            },
-            {
-                Commands.AddHolidays,
-                async messageParams => {
-                    var userSettingsParams = messageParams as UserSettingsParams;
-                    var settings = await _userSettingsService.GetUserAddHolidaysSettingsAsync(userSettingsParams.UserId);
-                    userSettingsParams.Settings = settings;
-                    await _messageService.GetSettingsListMessageAsync(userSettingsParams,  $"{Commands.AddHolidays.TrimStart('/')}_");
-                }
-            },
-            {
-                Commands.ThisWeek, 
-                async messageParams => {
-                    var getEventsParams = messageParams as GetEventsParams;
-                    getEventsParams.DatePeriod = DatePeriods.ThisWeek;
-                    await GetEvents(messageParams, getEventsParams);
-                } 
-            },
-            {
-                Commands.NextWeek,
-                async messageParams => {
-                    var getEventsParams = messageParams as GetEventsParams;
-                    getEventsParams.DatePeriod = DatePeriods.NextWeek;
-                    await GetEvents(messageParams, getEventsParams);
-                }
-            },
-            {
-                Commands.ThisMonth,
-                async messageParams => {
-                    var getEventsParams = messageParams as GetEventsParams;
-                    getEventsParams.DatePeriod = DatePeriods.ThisMonth;
-                    await GetEvents(messageParams, getEventsParams);
-                }
-            },
-            {
-                Commands.Next30Days,
-                async messageParams => {
-                    var getEventsParams = messageParams as GetEventsParams;
-                    getEventsParams.DatePeriod = DatePeriods.Next30Days;
-                    await GetEvents(messageParams, getEventsParams);
-                }
-            },
-            {
-                Commands.ThisYear,
-                async messageParams => {
-                    var getEventsParams = messageParams as GetEventsParams;
-                    getEventsParams.DatePeriod = DatePeriods.ThisYear;
-                    await GetEvents(messageParams, getEventsParams);
-                }
-            }
-        };
-        _updateSettingsActions = new Dictionary<string, Func<UpdateUserSettingsParams, Task>> { 
-            {
-                Commands.Billboards.TrimStart('/'),  
-                async settings =>
-                {
-                    await _userSettingsService.UpdateBillboardsSettingsAsync(settings);
-                    await _messageService.UpdateSettingsListMessageAsync(settings);
-                }
-            },
-            {
-                Commands.EventTypes.TrimStart('/'),
-                async settings =>
-                {
-                    await _userSettingsService.UpdateEventTypesSettingsAsync(settings);
-                    await _messageService.UpdateSettingsListMessageAsync(settings);
-                }
-            },
-            {
-                Commands.DaysOfWeek.TrimStart('/'),
-                async settings =>
-                {
-                    await _userSettingsService.UpdateDaysOfWeekSettingsAsync(settings);
-                    await _messageService.UpdateSettingsListMessageAsync(settings);
-                }
-            },
-            {
-                Commands.AddHolidays.TrimStart('/'),
-                async settings =>
-                {
-                    await _userSettingsService.UpdateAddHolidaysSettingsAsync(settings);
-                    await _messageService.UpdateSettingsListMessageAsync(settings);
-                }
-            }
-        };
+        _messageActionsService = messageActionsService;
+        _messageActions = _messageActionsService.Get();
+        _settingsKeys = _messageActionsService.GetSettingsKeys();
+        _getEventsKeys = _messageActionsService.GetEventsKeys();
     }
 
     public async Task HandleUpdateAsync(ITelegramBotClient _, Update update, CancellationToken cancellationToken)
@@ -186,7 +41,7 @@ public class UpdateHandler : IUpdateHandler
                         {
                             if (_getEventsKeys.Contains(update.CallbackQuery.Data.ToLower()))
                             {
-                                await action.Invoke(new GetEventsParams()
+                                await action.CreateMessages(new GetEventsParams()
                                 {
                                     ChatId = update.CallbackQuery.Message.Chat.Id,
                                     UserId = update.CallbackQuery.From.Id,
@@ -196,7 +51,7 @@ public class UpdateHandler : IUpdateHandler
                             else
                             if (_settingsKeys.Contains(update.CallbackQuery.Data.ToLower()))
                             {
-                                await action.Invoke(new UserSettingsParams()
+                                await action.CreateMessages(new UserSettingsParams()
                                 {
                                     ChatId = update.CallbackQuery.Message.Chat.Id,
                                     UserId = update.CallbackQuery.From.Id,
@@ -204,7 +59,7 @@ public class UpdateHandler : IUpdateHandler
                             }
                             else
                             {
-                                await action.Invoke(new MessageParams()
+                                await action.CreateMessages(new MessageParams()
                                 {
                                     ChatId = update.CallbackQuery.Message.Chat.Id,
                                 });
@@ -220,9 +75,9 @@ public class UpdateHandler : IUpdateHandler
                                     var entity = keys[0];
                                     var entityId = keys[1];
                                     var oldExclude = keys[2] == "1";
-                                    if (_updateSettingsActions.TryGetValue(entity, out var updateAction))
+                                    if (_messageActions.TryGetValue(entity, out var updateAction))
                                     {
-                                        await updateAction.Invoke(new UpdateUserSettingsParams()
+                                        await updateAction.CreateMessages(new UpdateUserSettingsParams()
                                         {
                                             ChatId = callbackQuery.Message.Chat.Id,
                                             UserId = update.CallbackQuery.From.Id,
@@ -254,7 +109,7 @@ public class UpdateHandler : IUpdateHandler
                     {
                         if (_messageActions.TryGetValue(update.Message.Text.ToLower(), out var action))
                         {
-                            await action.Invoke(new MessageParams()
+                            await action.CreateMessages(new MessageParams()
                             {
                                 ChatId = update.Message.Chat.Id
                             });
