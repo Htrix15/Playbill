@@ -98,7 +98,7 @@
   },
   "Eventhall": {
     "Place": "МТС Live Холл",
-    "BaseSearchUrl": "https://eventhall.ru/afisha/?slg=afisha&mdf_cat=10&page_mdf=",
+    "BaseSearchUrl": "https://vrn-live-hall.mts.ru/",
     "DateFormat": "dd MMMM yyyy",
     "TimeFormat": "HH:mm",
     "ItemsContainerXPath": "//div[contains(@class, 'row px-sm-1')]",
