@@ -39,6 +39,10 @@ public class Service : PageParseService
                     var placeItem = doc.DocumentNode.SelectSingleNode(options.PlaceXPath);
                     var place = placeItem.InnerText.Trim();
                     var fullAfisha = doc.DocumentNode.SelectSingleNode(options.ItemsContainerXPath);
+                    if (fullAfisha == null)
+                    {
+                        continue;
+                    }
                     var afishaItems = fullAfisha.SelectNodes(options.ItemsXPath);
                     foreach (var afishaItem in afishaItems)
                     {

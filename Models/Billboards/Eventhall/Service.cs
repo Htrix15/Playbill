@@ -40,6 +40,10 @@ public class Service : PageParseService
                     var doc = await web.LoadFromWebAsync(baseSearchUrl + eventKey);
 
                     var fullAfisha = doc.DocumentNode.SelectSingleNode(options.ItemsContainerXPath);
+                    if (fullAfisha == null)
+                    {
+                        continue;
+                    }
                     var afishaItems = fullAfisha.SelectNodes(options.ItemsXPath);
                     if (afishaItems == null)
                     {
