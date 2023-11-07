@@ -1,5 +1,7 @@
-﻿using Models.ProcessingServices.EventDateIntervals.Common.Enums;
-using TelegramBot.Params;
+﻿using Models.Events;
+using Models.ProcessingServices.EventDateIntervals.Common.Enums;
+using Telegram.Bot.Types;
+using TelegramBot.Extensions;
 using TelegramBot.Services;
 
 namespace TelegramBot.Handlers.Actions.Common;
@@ -16,25 +18,33 @@ public abstract class EventMessageBase : MessageBase
         _eventService = eventService;
         _datePeriod = datePeriod;
     }
-    public override async Task CreateMessages(BaseParams @params)
+    public override async Task CreateMessages(Update update)
     {
-        await CreateMessages(@params as GetEventsParams);
-    }
+        var @params = update.GetGetEventsParams(_datePeriod);
 
-    protected async Task CreateMessages(GetEventsParams @params)
-    {
-        @params.DatePeriod = _datePeriod;
-        await _messageService.GetStartSearchMessageAsync(new MessageParams()
-        {
-            ChatId = @params.ChatId
-        });
+        await _messageService.SendMessageAsync(@params.ChatId, "Начат поиск событий...");
 
         var events = await _eventService.GetEvents(@params);
-        var eventsMessagesParams = new EventsMessagesParams()
+        foreach (var @event in events)
         {
-            ChatId = @params.ChatId,
-            Events = events
-        };
-        await _messageService.GetEventMessagesAsync(eventsMessagesParams);
+            var caption = GetCaptionFromEvent(@event);
+            var buttons = MarkupHelper.GetEventButtons(@event.Links);
+            await _messageService.SendMessageWithPhotoAsync(@params.ChatId, caption, @event.ImagePath, buttons, false);
+
+        }
+        await _messageService.SendMessageAsync(@params.ChatId, "Поиск завершен!", MarkupHelper.GetStartButtons());
+    }
+
+    private string GetCaptionFromEvent(Event @event)
+    {
+        var dateMask = @event.Date!.Value.Hour != 0 ? "dd MMMM HH:mm (dddd)" : "dd MMMM (dddd)";
+        var times = @event.Sessions?.Any() ?? false
+            ? $"({string.Join(", ", @event.Sessions.Select(session => session.ToString("HH:mm")))})"
+            : "";
+        return $"*{MessageService.TextNormalization(@event.Title)}*" +
+            $"\n{@event.Type}" +
+            $"\n*{MessageService.TextNormalization(@event.Date.Value.ToString(dateMask))}*" +
+            $"\n{MessageService.TextNormalization(times)}" +
+            $"\n{MessageService.TextNormalization(@event.Place)}";
     }
 }

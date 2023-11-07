@@ -16,4 +16,5 @@ public class Event
     public required string? ImagePath { get; set; }
     public required string? Place { get; set; }
     public required List<EventLink> Links { get; set; }
+
 }

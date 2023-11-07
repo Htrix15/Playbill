@@ -1,10 +1,10 @@
-﻿using TelegramBot.Handlers.Actions.Common;
-using TelegramBot.Params;
+﻿using Telegram.Bot.Types.ReplyMarkups;
+using TelegramBot.Handlers.Actions.Common;
 using TelegramBot.Services;
 
 namespace TelegramBot.Handlers.Actions;
 
-public class Start : MessageBase
+public class Start : NavigationMessage
 {
     public Start(MessageService messageService) : base(messageService)
     {
@@ -12,5 +12,7 @@ public class Start : MessageBase
 
     public override string Command => Commands.Start;
 
-    public override Task CreateMessages(BaseParams @params) => _messageService.GetStartMessageAsync(@params as MessageParams);
+    public override string MessageText => "Хай! Я бот который ищет афишу для Воронежа." + "\nРекомендую в начале поставить ограничения в настройках поиска, иначе событий может быть слишком много.";
+
+    public override InlineKeyboardMarkup Buttons => MarkupHelper.GetStartButtons();
 }

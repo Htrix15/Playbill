@@ -20,9 +20,7 @@ var customServices = new List<Action<ServiceCollection>>()
         ThrowPendingUpdates = true,
     }),
     services => services.AddScoped<MessageService>(),
-    services => services.AddScoped<MarkupService>(),
     services => services.AddScoped<EventService>(),
-    services => services.AddScoped<UserSettingsService>(),
     services => services.AddScoped<MessageActionsService>()
 };
 

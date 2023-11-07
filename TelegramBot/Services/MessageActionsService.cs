@@ -1,4 +1,7 @@
-﻿using TelegramBot.Handlers.Actions;
+﻿using Microsoft.Extensions.Options;
+using Models.Search;
+using Models.Users;
+using TelegramBot.Handlers.Actions;
 using TelegramBot.Handlers.Actions.Common;
 
 namespace TelegramBot.Services;
@@ -6,29 +9,35 @@ namespace TelegramBot.Services;
 public class MessageActionsService
 {
     private readonly MessageService _messageService;
-    private readonly UserSettingsService _userSettingsService;
     private readonly EventService _eventService;
+    private readonly SearchOptions _searchOptions;
+    private readonly IUserSettingsRepository _userSettingsRepository;
 
-    private readonly List<MessageBase> Actions = new();
+    private readonly List<MessageBase> NavigationMessage = new();
     private readonly List<SettingsMessageBase> UserSettings = new();
     private readonly List<EventMessageBase> GetEvents = new();
 
-    public MessageActionsService(MessageService messageService, UserSettingsService userSettingsService, EventService eventService)
+    public MessageActionsService(IOptions<SearchOptions> defaultOptions, 
+        MessageService messageService,
+        EventService eventService,
+        IUserSettingsRepository userSettingsRepository)
     {
+        _searchOptions = defaultOptions.Value;
+        _userSettingsRepository = userSettingsRepository;
         _messageService = messageService;
-        _userSettingsService = userSettingsService;
         _eventService = eventService;
 
-        Actions.Add(new Start(_messageService));
-        Actions.Add(new Search(_messageService));
-        Actions.Add(new Settings(_messageService));
+        NavigationMessage.Add(new Start(_messageService));
+        NavigationMessage.Add(new Search(_messageService));
+        NavigationMessage.Add(new Settings(_messageService));
 
-        UserSettings.Add(new UserBillboards(_messageService, _userSettingsService));
-        UserSettings.Add(new UserEventTypes(_messageService, _userSettingsService));
-        UserSettings.Add(new UserDaysOfWeek(_messageService, _userSettingsService));
-        UserSettings.Add(new UserAddHolidays(_messageService, _userSettingsService));
+        UserSettings.Add(new UserBillboards(_messageService, _searchOptions, _userSettingsRepository));
+        UserSettings.Add(new UserEventTypes(_messageService, _searchOptions, _userSettingsRepository));
+        UserSettings.Add(new UserDaysOfWeek(_messageService, _searchOptions, _userSettingsRepository));
+        UserSettings.Add(new UserAddHolidays(_messageService, _searchOptions, _userSettingsRepository));
 
         GetEvents.Add(new ThisWeekEvents(_messageService, _eventService));
+        GetEvents.Add(new NextWeekEvents(_messageService, _eventService));
         GetEvents.Add(new ThisMonthEvents(_messageService, _eventService));
         GetEvents.Add(new Next30DaysEvents(_messageService, _eventService));
         GetEvents.Add(new ThisYearEvents(_messageService, _eventService));
@@ -39,12 +48,9 @@ public class MessageActionsService
     {
         var messageActions = new Dictionary<string, IActionMessage>();
 
-        Actions.ForEach(action => action.InsertTo(messageActions));
+        NavigationMessage.ForEach(action => action.InsertTo(messageActions));
         UserSettings.ForEach(userSetting => userSetting.InsertTo(messageActions));
         GetEvents.ForEach(getEvent => getEvent.InsertTo(messageActions));
         return messageActions;
     }
-
-    public List<string> GetSettingsKeys() => UserSettings.Select(userSetting => userSetting.Command).ToList();
-    public List<string> GetEventsKeys() => GetEvents.Select(userSetting => userSetting.Command).ToList();
 }
