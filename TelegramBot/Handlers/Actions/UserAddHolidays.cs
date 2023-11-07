@@ -17,8 +17,8 @@ public class UserAddHolidays : SettingsMessageBase
     {
         CollbackAction = new Collback(messageService, searchOptions, userSettingsRepository);
     }
-
-    public override string Command => Commands.AddHolidays;
+    public override string Command => GetCommand();
+    public static new string GetCommand() => "/addholidays";
 
     public override async Task CreateMessages(Update update)
     {

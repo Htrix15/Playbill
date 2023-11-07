@@ -10,19 +10,19 @@ public class Search : NavigationMessage
     public Search(MessageService messageService) : base(messageService)
     {
     }
-
-    public override string Command => Commands.Search;
+    public override string Command => GetCommand();
+    public static new string GetCommand() => "/search";
 
     public override string MessageText => "За какой период искать?";
 
     public override InlineKeyboardMarkup Buttons => new InlineKeyboardMarkup(new[]
-        {
-            new[]{ InlineKeyboardButton.WithCallbackData("На этой неделе", Commands.ThisWeek) },
-            new[]{ InlineKeyboardButton.WithCallbackData("На следующей неделе", Commands.NextWeek), },
-            new[]{ InlineKeyboardButton.WithCallbackData("Ближайшие 30 дней", Commands.Next30Days), },
-            new[]{ InlineKeyboardButton.WithCallbackData("До конца месяца", Commands.ThisMonth), },
-            new[]{ InlineKeyboardButton.WithCallbackData("До конца года", Commands.ThisYear), },
-            MarkupHelper.Settings
-        });
+    {
+        new[]{ InlineKeyboardButton.WithCallbackData("На этой неделе", ThisWeekEvents.GetCommand()) },
+        new[]{ InlineKeyboardButton.WithCallbackData("На следующей неделе", NextWeekEvents.GetCommand()) },
+        new[]{ InlineKeyboardButton.WithCallbackData("Ближайшие 30 дней", Next30DaysEvents.GetCommand()) },
+        new[]{ InlineKeyboardButton.WithCallbackData("До конца месяца", ThisMonthEvents.GetCommand()) },
+        new[]{ InlineKeyboardButton.WithCallbackData("До конца года", ThisYearEvents.GetCommand()) },
+        MarkupHelper.Settings
+    });
 
 }

@@ -9,5 +9,6 @@ public class NextWeekEvents : EventMessageBase
     public NextWeekEvents(MessageService messageService, EventService eventService) : base(messageService, eventService, DatePeriods.NextWeek)
     {
     }
-    public override string Command => Commands.NextWeek;
+    public override string Command => GetCommand();
+    public static new string GetCommand() => "/nextweek";
 }

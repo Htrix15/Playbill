@@ -1,5 +1,6 @@
 ﻿using Models.Events;
 using Telegram.Bot.Types.ReplyMarkups;
+using TelegramBot.Handlers.Actions;
 using static TelegramBot.Params.UserSettingsParams;
 
 namespace TelegramBot.Helpers;
@@ -9,8 +10,8 @@ public static class MarkupHelper
     public static readonly char Include = '✅';
     public static readonly char Exclude = '❌';
 
-    public static readonly InlineKeyboardButton[] StartSearch = new[] { InlineKeyboardButton.WithCallbackData("Найти события 🔍", Commands.Search) };
-    public static readonly InlineKeyboardButton[] Settings = new[] { InlineKeyboardButton.WithCallbackData("Настроить поиск ⚙", Commands.Settings) };
+    public static readonly InlineKeyboardButton[] StartSearch = new[] { InlineKeyboardButton.WithCallbackData("Найти события 🔍", Search.GetCommand()) };
+    public static readonly InlineKeyboardButton[] Settings = new[] { InlineKeyboardButton.WithCallbackData("Настроить поиск ⚙", Handlers.Actions.Settings.GetCommand()) };
 
     public static InlineKeyboardMarkup GetStartButtons()
     {
@@ -34,7 +35,7 @@ public static class MarkupHelper
         inlineKeyboardButton.AddRange(
         new[] {
             StartSearch,
-            new[]{ InlineKeyboardButton.WithCallbackData("Вернуться к списку настроек ⤴︎", Commands.Settings) },
+            new[]{ InlineKeyboardButton.WithCallbackData("Вернуться к списку настроек ⤴︎", Handlers.Actions.Settings.GetCommand()) },
         });
         return new InlineKeyboardMarkup(inlineKeyboardButton);
     }

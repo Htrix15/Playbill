@@ -17,8 +17,8 @@ public class UserDaysOfWeek : SettingsMessageBase
     {
         CollbackAction = new Collback(messageService, searchOptions, userSettingsRepository);
     }
-
-    public override string Command => Commands.DaysOfWeek;
+    public override string Command => GetCommand();
+    public static new string GetCommand() => "/daysofweek";
 
     public override async Task CreateMessages(Update update)
     {
@@ -36,6 +36,7 @@ public class UserDaysOfWeek : SettingsMessageBase
             IUserSettingsRepository userSettingsRepository) : base(messageService, searchOptions, userSettingsRepository)
         {
         }
+
         public override string Command => throw new NotImplementedException();
 
         public override async Task CreateMessages(Update update)

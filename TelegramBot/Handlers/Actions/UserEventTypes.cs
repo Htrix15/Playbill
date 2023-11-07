@@ -17,8 +17,8 @@ public class UserEventTypes : SettingsMessageBase
     {
         CollbackAction = new Collback(messageService, searchOptions, userSettingsRepository);
     }
-
-    public override string Command => Commands.EventTypes;
+    public override string Command => GetCommand();
+    public static new string GetCommand() => "/eventtypes";
 
     public override async Task CreateMessages(Update update)
     {

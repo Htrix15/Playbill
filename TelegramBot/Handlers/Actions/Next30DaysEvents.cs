@@ -10,5 +10,7 @@ public class Next30DaysEvents : EventMessageBase
     {
     }
 
-    public override string Command => Commands.Next30Days;
+    public override string Command => GetCommand();
+    public static new string GetCommand() => "/next30days";
+
 }

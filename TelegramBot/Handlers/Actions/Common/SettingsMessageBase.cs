@@ -16,7 +16,6 @@ public abstract class SettingsMessageBase : MessageBase
 
     public string MessageText => "Нажмите на то, что хотите добавить или удалить";
 
-
     protected SettingsMessageBase CollbackAction;
 
     public SettingsMessageBase(MessageService messageService, 

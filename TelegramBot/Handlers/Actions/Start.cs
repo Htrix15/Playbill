@@ -10,8 +10,8 @@ public class Start : NavigationMessage
     public Start(MessageService messageService) : base(messageService)
     {
     }
-
-    public override string Command => Commands.Start;
+    public override string Command => GetCommand();
+    public static new string GetCommand() => "/start";
 
     public override string MessageText => "Хай! Я бот который ищет афишу для Воронежа." + "\nРекомендую в начале поставить ограничения в настройках поиска, иначе событий может быть слишком много.";
 

@@ -9,6 +9,6 @@ public class ThisMonthEvents : EventMessageBase
     public ThisMonthEvents(MessageService messageService, EventService eventService) : base(messageService, eventService, DatePeriods.ThisMonth)
     {
     }
-
-    public override string Command => Commands.ThisMonth;
+    public override string Command => GetCommand();
+    public static new string GetCommand() => "/thismonth";
 }
