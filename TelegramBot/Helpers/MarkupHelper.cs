@@ -2,7 +2,7 @@
 using Telegram.Bot.Types.ReplyMarkups;
 using static TelegramBot.Params.UserSettingsParams;
 
-namespace TelegramBot;
+namespace TelegramBot.Helpers;
 
 public static class MarkupHelper
 {

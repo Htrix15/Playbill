@@ -1,4 +1,4 @@
-﻿namespace TelegramBot;
+﻿namespace TelegramBot.Exceptions;
 
 public class NotFoundCommandException : Exception
 {

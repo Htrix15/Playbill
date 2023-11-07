@@ -6,7 +6,7 @@ using Repository;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types.Enums;
-using TelegramBot;
+using TelegramBot.Configurations;
 using TelegramBot.Handles;
 using TelegramBot.Services;
 

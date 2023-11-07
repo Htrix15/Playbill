@@ -3,7 +3,7 @@ using Models.Users;
 using Telegram.Bot.Types;
 using TelegramBot.Extensions;
 using TelegramBot.Handlers.Actions.Common;
-using TelegramBot.Params;
+using TelegramBot.Helpers;
 using TelegramBot.Services;
 using static TelegramBot.Params.UserSettingsParams;
 
