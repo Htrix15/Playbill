@@ -9,7 +9,7 @@ using static TelegramBot.Params.UserSettingsParams;
 
 namespace TelegramBot.Handlers.Actions;
 
-public class UserAddHolidays : SettingsMessageBase
+public class UserAddHolidays : SettingsMessageBase<UserSettings>
 {
     public UserAddHolidays(MessageService messageService,
         SearchOptions searchOptions,
@@ -22,11 +22,12 @@ public class UserAddHolidays : SettingsMessageBase
 
     public override async Task CreateMessages(Update update)
     {
+        var userSettingsRepository = _repository as IUserSettingsRepository;
         var userSettingsParams = update.GetUserSettingsParams();
         var settings = new List<Setting>() {
             new Setting()
             {
-                Exclude = ! await _userSettingsRepository.GetAddHolidaysAsync(userSettingsParams.UserId),
+                Exclude = ! await userSettingsRepository.GetAddHolidaysAsync(userSettingsParams.UserId),
                 Id = 1,
                 Label = "Искать в праздничные выходные"
             }
@@ -34,20 +35,20 @@ public class UserAddHolidays : SettingsMessageBase
         await CreateMessages(userSettingsParams, settings);
     }
 
-    class Collback : SettingsMessageBase
+    class Collback : CollbackMessage<UserSettings>
     {
         public Collback(MessageService messageService,
             SearchOptions searchOptions,
             IUserSettingsRepository userSettingsRepository) : base(messageService, searchOptions, userSettingsRepository)
         {
         }
-
-        public override string Command => throw new NotImplementedException();
+        public override string Command => CollbackCommandHelper.Create(UserAddHolidays.GetCommand());
 
         public override async Task CreateMessages(Update update)
         {
+            var userSettingsRepository = _repository as IUserSettingsRepository;
             var updateUserSettingsParams = update.GetUpdateUserSettingsParams();
-            await _userSettingsRepository.UpdateAddHolidays(updateUserSettingsParams.UserId, 
+            await userSettingsRepository.UpdateAddHolidaysAsync(updateUserSettingsParams.UserId, 
                 !updateUserSettingsParams.Exclude);
             await _messageService.EditMessageAsync(updateUserSettingsParams.ChatId, 
                 updateUserSettingsParams.MessageId,

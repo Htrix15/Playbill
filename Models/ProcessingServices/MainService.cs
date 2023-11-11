@@ -73,6 +73,8 @@ public class MainService
 
         events = _eventsGroupingService.EventsGrouping(events);
 
+        events = events.Where(@event => intervals.Any(interval => DateOnly.FromDateTime(@event.Date.Value) >= interval.StartDate && DateOnly.FromDateTime(@event.Date.Value) <= interval.EndDate)).ToList();
+
         await _placesService.AddNewPlaceAsync(places, events);
 
         return events;

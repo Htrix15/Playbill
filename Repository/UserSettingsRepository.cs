@@ -44,7 +44,7 @@ public class UserSettingsRepository : IUserSettingsRepository
         .AsNoTracking()
         .FirstOrDefaultAsync(userSettings => userSettings.Id == userId))?.ExcludePlacesIds ?? new List<int>();
 
-    public async Task UpdateAddHolidays(long userId, bool addHolidays)
+    public async Task UpdateAddHolidaysAsync(long userId, bool addHolidays)
     {
         if (await UserExsistAsync(userId))
         {
@@ -128,7 +128,7 @@ public class UserSettingsRepository : IUserSettingsRepository
         await _applicationDbContext.SaveChangesAsync();
     }
 
-    public async Task UpdateExcludePlacesIds(long userId, List<int> placesIds)
+    public async Task UpdateExcludePlacesIdsAsync(long userId, List<int> placesIds)
     {
         if (await UserExsistAsync(userId))
         {

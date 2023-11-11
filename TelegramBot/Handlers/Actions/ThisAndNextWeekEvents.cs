@@ -1,4 +1,5 @@
-﻿using Models.ProcessingServices.EventDateIntervals.Common.Enums;
+﻿using Models.Places;
+using Models.ProcessingServices.EventDateIntervals.Common.Enums;
 using TelegramBot.Handlers.Actions.Common;
 using TelegramBot.Services;
 
@@ -6,8 +7,8 @@ namespace TelegramBot.Handlers.Actions;
 
 public class ThisAndNextWeekEvents : EventMessageBase
 {
-    public ThisAndNextWeekEvents(MessageService messageService, EventService eventService, int limitMessagePerSeconds)
-        : base(messageService, eventService, DatePeriods.ThisAndNextWeek, limitMessagePerSeconds)
+    public ThisAndNextWeekEvents(MessageService messageService, EventService eventService, int limitMessagePerSeconds, IPlaceRepository placeRepository) 
+        : base(messageService, eventService, DatePeriods.ThisAndNextWeek, limitMessagePerSeconds, placeRepository)
     {
     }
     public override string Command => GetCommand();

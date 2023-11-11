@@ -9,7 +9,7 @@ using TelegramBot.Services;
 
 namespace TelegramBot.Handlers.Actions;
 
-public class UserEventTypes : SettingsMessageBase
+public class UserEventTypes : SettingsMessageBase<UserSettings>
 {
     public UserEventTypes(MessageService messageService,
         SearchOptions searchOptions,
@@ -24,36 +24,39 @@ public class UserEventTypes : SettingsMessageBase
     {
         var userSettingsParams = update.GetUserSettingsParams();
         var settings = _searchOptions.SearchEventTypes?.Select(ConverFunctions<EventTypes>()).ToList() ?? new List<Params.UserSettingsParams.Setting>();
-        
+
+        var userSettingsRepository = _repository as IUserSettingsRepository;
+
         var userExcludes = new List<EventTypes>();
-        if (await _userSettingsRepository.UserExsistAsync(userSettingsParams.UserId))
+        if (await userSettingsRepository.UserExsistAsync(userSettingsParams.UserId))
         {
-            userExcludes = await _userSettingsRepository.GetExcludeEventTypesAsync(userSettingsParams.UserId) ?? userExcludes;
+            userExcludes = await userSettingsRepository.GetExcludeEventTypesAsync(userSettingsParams.UserId) ?? userExcludes;
         } 
         else
         {
             userExcludes = _searchOptions.ExcludeSearchEventTypes?.ToList() ?? new List<EventTypes>();
         }
 
-        SetExclude(userExcludes, settings);
+        MarkExcludeSettingsHelper.SetExclude(userExcludes, settings);
 
         await CreateMessages(userSettingsParams, settings);
     }
-    class Collback : SettingsMessageBase
+    class Collback : CollbackMessage<UserSettings>
     {
         public Collback(MessageService messageService,
-                   SearchOptions searchOptions,
-                   IUserSettingsRepository userSettingsRepository) : base(messageService, searchOptions, userSettingsRepository)
+            SearchOptions searchOptions,
+            IUserSettingsRepository repository) : base(messageService, searchOptions, repository)
         {
         }
 
-        public override string Command => throw new NotImplementedException();
+        public override string Command => CollbackCommandHelper.Create(UserEventTypes.GetCommand());
 
         public override async Task CreateMessages(Update update)
         {
+            var userSettingsRepository = _repository as IUserSettingsRepository;
             var updateUserSettingsParams = update.GetUpdateUserSettingsParams();
             var userId = updateUserSettingsParams.UserId;
-            var excludes = await _userSettingsRepository.GetExcludeEventTypesAsync(userId)
+            var excludes = await userSettingsRepository.GetExcludeEventTypesAsync(userId)
                 ?? _searchOptions.ExcludeSearchEventTypes?.ToList() 
                 ?? new List<EventTypes>();
             var key = Enum.Parse<EventTypes>(updateUserSettingsParams.EntityId);
@@ -65,7 +68,7 @@ public class UserEventTypes : SettingsMessageBase
             {
                 excludes.Remove(key);
             }
-            await _userSettingsRepository.UpdateExcludeEventTypesAsync(userId, excludes);
+            await userSettingsRepository.UpdateExcludeEventTypesAsync(userId, excludes);
             await _messageService.EditMessageAsync(updateUserSettingsParams.ChatId,
                 updateUserSettingsParams.MessageId,
                 MarkupHelper.ReplaceButtons(updateUserSettingsParams.Markup, updateUserSettingsParams.Key));

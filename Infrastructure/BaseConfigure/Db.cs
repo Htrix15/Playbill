@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Models;
 using Models.Places;
 using Repository;
 
@@ -10,7 +11,7 @@ public static class Db
     {
         services
             .AddDbContext<ApplicationDbContext>()
-            .AddTransient<IPlaceRepository, PlaceRespository>()
+            .AddTransient<IRepository<Place>, PlaceRespository>()
             ;
     }       
 }

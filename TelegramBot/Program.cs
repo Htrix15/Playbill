@@ -1,6 +1,7 @@
 ﻿using Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Models;
 using Models.Users;
 using Repository;
 using Telegram.Bot;
@@ -46,7 +47,7 @@ var customServicesWithOptions = new List<Action<ServiceCollection, IConfiguratio
 
 var customDb = new List<Action<ServiceCollection>>()
 {
-    services => services.AddTransient<IUserSettingsRepository, UserSettingsRepository>()
+    services => services.AddTransient<IRepository<UserSettings>, UserSettingsRepository>(),
 };
 
 using var serviceProvider = Builder

@@ -8,7 +8,7 @@ using TelegramBot.Helpers;
 
 namespace TelegramBot.Handlers.Actions;
 
-public class UserDaysOfWeek : SettingsMessageBase
+public class UserDaysOfWeek : SettingsMessageBase<UserSettings>
 {
     public UserDaysOfWeek(MessageService messageService,
         SearchOptions searchOptions,
@@ -21,14 +21,15 @@ public class UserDaysOfWeek : SettingsMessageBase
 
     public override async Task CreateMessages(Update update)
     {
+        var userSettingsRepository = _repository as IUserSettingsRepository;
         var userSettingsParams = update.GetUserSettingsParams();
         var settings = _searchOptions.DaysOfWeek.Select(ConverFunctions<DayOfWeek>()).ToList();
-        var userExcludes = await _userSettingsRepository.GetExcludeDaysOfWeekAsync(userSettingsParams.UserId);
-        SetExclude(userExcludes, settings);
+        var userExcludes = await userSettingsRepository.GetExcludeDaysOfWeekAsync(userSettingsParams.UserId);
+        MarkExcludeSettingsHelper.SetExclude(userExcludes, settings);
         await CreateMessages(userSettingsParams, settings);
     }
 
-    class Collback : SettingsMessageBase
+    class Collback : CollbackMessage<UserSettings>
     {
         public Collback(MessageService messageService,
             SearchOptions searchOptions,
@@ -36,13 +37,14 @@ public class UserDaysOfWeek : SettingsMessageBase
         {
         }
 
-        public override string Command => throw new NotImplementedException();
+        public override string Command => CollbackCommandHelper.Create(UserDaysOfWeek.GetCommand());
 
         public override async Task CreateMessages(Update update)
         {
+            var userSettingsRepository = _repository as IUserSettingsRepository;
             var updateUserSettingsParams = update.GetUpdateUserSettingsParams();
             var userId = updateUserSettingsParams.UserId;
-            var excludes = await _userSettingsRepository.GetExcludeDaysOfWeekAsync(userId);
+            var excludes = await userSettingsRepository.GetExcludeDaysOfWeekAsync(userId);
             var key = Enum.Parse<DayOfWeek>(updateUserSettingsParams.EntityId);
             if (updateUserSettingsParams.Exclude)
             {
@@ -52,7 +54,7 @@ public class UserDaysOfWeek : SettingsMessageBase
             {
                 excludes.Remove(key);
             }
-            await _userSettingsRepository.UpdateExcludeDaysOfWeekAsync(userId, excludes);
+            await userSettingsRepository.UpdateExcludeDaysOfWeekAsync(userId, excludes);
             await _messageService.EditMessageAsync(updateUserSettingsParams.ChatId,
                 updateUserSettingsParams.MessageId,
                 MarkupHelper.ReplaceButtons(updateUserSettingsParams.Markup, updateUserSettingsParams.Key));

@@ -1,5 +1,7 @@
-﻿using Models.Search;
-using Models.Users;
+﻿using Models;
+using Models.Search;
+using Telegram.Bot.Types.ReplyMarkups;
+using TelegramBot.Extensions;
 using TelegramBot.Helpers;
 using TelegramBot.Params;
 using TelegramBot.Services;
@@ -7,47 +9,37 @@ using static TelegramBot.Params.UserSettingsParams;
 
 namespace TelegramBot.Handlers.Actions.Common;
 
-public abstract class SettingsMessageBase : MessageBase
+public abstract class SettingsMessageBase<T> : MessageBase
 {
     protected readonly SearchOptions _searchOptions;
-    protected readonly IUserSettingsRepository _userSettingsRepository;
-    protected string CommandKey => $"{Command.TrimStart('/')}_";
-    protected string CollbackKey => Command.TrimStart('/');
+    protected readonly IRepository<T> _repository;
+    protected string CommandKey => CommandKeyHelper.Create(Command);
 
     public string MessageText => "Нажмите на то, что хотите добавить или удалить";
 
-    protected SettingsMessageBase CollbackAction;
+    protected CollbackMessage<T> CollbackAction;
 
     public SettingsMessageBase(MessageService messageService, 
         SearchOptions searchOptions,
-        IUserSettingsRepository userSettingsRepository) : base(messageService)
+        IRepository<T> repository) : base(messageService)
     {
         _searchOptions = searchOptions;
-        _userSettingsRepository = userSettingsRepository;
+        _repository = repository;
     }
 
-    protected void SetExclude<T>(IEnumerable<T> excludeCollection, List<Setting> result)
-    {
-        excludeCollection.ToList().ForEach(excludeBillboard =>
-        {
-            var billboard = result.FirstOrDefault(billboard => billboard.Id == Convert.ToInt32(excludeBillboard));
-            if (billboard is not null)
-            {
-                billboard.Exclude = true;
-            }
-        });
-    }
-
-    protected Func<T, Setting> ConverFunctions<T>() => billboard => new Setting()
+    protected Func<T, Setting> ConverFunctions<T>() => item => new Setting()
     {
         Exclude = false,
-        Id = Convert.ToInt32(billboard),
-        Label = billboard.ToString()
+        Id = Convert.ToInt32(item),
+        Label = item?.ToString() ?? string.Empty
     };
 
     protected async Task CreateMessages(UserSettingsParams @params, List<Setting> settings)
     {
-        await _messageService.SendMessageAsync(@params.ChatId, MessageText, MarkupHelper.GetSettingsButtons(settings, CommandKey));
+        var buttons = new List<InlineKeyboardButton[]>();
+        buttons.AddRange(MarkupHelper.CreateToogleButtons(settings, CommandKey));
+        buttons.AddRange(MarkupHelper.SettingsSet);
+        await _messageService.SendMessageAsync(@params.ChatId, MessageText, buttons.ToInlineKeyboardMarkup());
     }
 
     public override void InsertTo(Dictionary<string, IActionMessage> dictionary)
@@ -55,7 +47,17 @@ public abstract class SettingsMessageBase : MessageBase
         dictionary.Add(Command, this);
         if (CollbackAction != null)
         {
-            dictionary.Add(CollbackKey, CollbackAction);
+            dictionary.Add(CollbackAction.Command, CollbackAction);
         }
+    }
+}
+
+public abstract class SettingsMessageBase<T1, T2> : SettingsMessageBase<T1>
+{
+    protected readonly IRepository<T2> _supportRepository;
+    protected SettingsMessageBase(MessageService messageService, SearchOptions searchOptions, IRepository<T1> repository, IRepository<T2> supportRepository) 
+        : base(messageService, searchOptions, repository)
+    {
+        _supportRepository = supportRepository;
     }
 }

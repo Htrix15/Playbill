@@ -10,10 +10,10 @@ public class PlacesService
     private readonly IMapper _mapper;
     private readonly IPlaceRepository _placeRepository;
 
-    public PlacesService(IMapper mapper, IPlaceRepository placeRepository)
+    public PlacesService(IMapper mapper, IRepository<Place> placeRepository)
     {
         _mapper = mapper;
-        _placeRepository = placeRepository;
+        _placeRepository = (IPlaceRepository)placeRepository;
     }
 
     public async Task<List<Place>> GetPlacesAsync() => await _placeRepository.GetPlacesAsync();

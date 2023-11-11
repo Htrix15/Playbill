@@ -17,7 +17,8 @@ public class Settings : NavigationMessage
 
     public override InlineKeyboardMarkup Buttons => new InlineKeyboardMarkup(new[]
     {
-        new[]{ InlineKeyboardButton.WithCallbackData("Где искать", UserBillboards.GetCommand()) },
+        new[]{ InlineKeyboardButton.WithCallbackData("На каких сайтах искать", UserBillboards.GetCommand()) },
+        new[]{ InlineKeyboardButton.WithCallbackData("Какие площадки не нужны", UserPlaces.GetCommand()) },
         new[]{ InlineKeyboardButton.WithCallbackData("Какие события искать", UserEventTypes.GetCommand()) },
         new[]{ InlineKeyboardButton.WithCallbackData("Какие дни недели искать", UserDaysOfWeek.GetCommand()) },
         new[]{ InlineKeyboardButton.WithCallbackData("Добавить ли праздничные выходные", UserAddHolidays.GetCommand()) },

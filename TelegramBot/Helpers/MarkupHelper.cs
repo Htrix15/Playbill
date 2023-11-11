@@ -12,7 +12,8 @@ public static class MarkupHelper
 
     public static readonly InlineKeyboardButton[] StartSearch = new[] { InlineKeyboardButton.WithCallbackData("Найти события 🔍", Search.GetCommand()) };
     public static readonly InlineKeyboardButton[] Settings = new[] { InlineKeyboardButton.WithCallbackData("Настроить поиск ⚙", Handlers.Actions.Settings.GetCommand()) };
-
+    public static readonly InlineKeyboardButton[] BackToSettings = new[] { InlineKeyboardButton.WithCallbackData("Вернуться к списку настроек ⤴︎", Handlers.Actions.Settings.GetCommand()) };
+    public static readonly List<InlineKeyboardButton[]> SettingsSet = new List<InlineKeyboardButton[]> { StartSearch, BackToSettings };
     public static InlineKeyboardMarkup GetStartButtons()
     {
         return new InlineKeyboardMarkup(new[]
@@ -22,7 +23,7 @@ public static class MarkupHelper
         });
     }
 
-    public static InlineKeyboardMarkup GetSettingsButtons(List<Setting> settings, string key)
+    public static List<InlineKeyboardButton[]> CreateToogleButtons(List<Setting> settings, string key)
     {
         var inlineKeyboardButton = new List<InlineKeyboardButton[]>();
         settings.ForEach(setting =>
@@ -31,13 +32,7 @@ public static class MarkupHelper
             var excludeLabel = setting.Exclude ? Exclude : Include;
             inlineKeyboardButton.Add(new[] { InlineKeyboardButton.WithCallbackData($"{setting.Label} {excludeLabel}", key + setting.Id + $"_{excludeFlag}") });
         });
-
-        inlineKeyboardButton.AddRange(
-        new[] {
-            StartSearch,
-            new[]{ InlineKeyboardButton.WithCallbackData("Вернуться к списку настроек ⤴︎", Handlers.Actions.Settings.GetCommand()) },
-        });
-        return new InlineKeyboardMarkup(inlineKeyboardButton);
+        return inlineKeyboardButton;
     }
 
     public static InlineKeyboardMarkup GetEventButtons(List<EventLink> eventLinks)

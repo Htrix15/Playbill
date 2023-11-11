@@ -1,4 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
+using Models;
+using Models.Places;
 using Models.ProcessingServices;
 using Models.Search;
 using Models.Users;
@@ -11,13 +13,16 @@ public class EventService
     private readonly SearchOptions _searchOptions;
     private readonly MainService _mainService;
     private readonly IUserSettingsRepository _userSettingsRepository;
+    private readonly IPlaceRepository _placeRepository;
     public EventService(IOptions<SearchOptions> defaultOptions, 
-        MainService mainService, 
-        IUserSettingsRepository userSettingsRepository)
+        MainService mainService,
+        IRepository<UserSettings> userSettingsRepository,
+        IRepository<Place> placeRepository)
     {
         _searchOptions = defaultOptions.Value;
         _mainService = mainService;
-        _userSettingsRepository = userSettingsRepository;
+        _userSettingsRepository = (IUserSettingsRepository)userSettingsRepository;
+        _placeRepository = (IPlaceRepository)placeRepository;
     }
 
     public async Task<IList<Models.Events.Event>> GetEvents(GetEventsParams getEventsParams)
@@ -37,6 +42,11 @@ public class EventService
         {
             searchOptions.SearchEventTypes = searchOptions.SearchEventTypes.Except(userSettings.ExcludeEventTypes.ToHashSet()).ToHashSet();
         }
+        if (userSettings.ExcludePlacesIds?.Any() ?? false)
+        {
+            searchOptions.ExcludePlacesTerms = (await _placeRepository.GetPlacesAsync(userSettings.ExcludePlacesIds, place => place.Name)).ToHashSet();
+        }
+
         searchOptions.AddHolidays = userSettings.AddHolidays;
    
         searchOptions.DatePeriod = getEventsParams.DatePeriod;

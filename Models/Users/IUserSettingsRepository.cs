@@ -3,7 +3,7 @@ using Models.Events;
 
 namespace Models.Users;
 
-public interface IUserSettingsRepository
+public interface IUserSettingsRepository : IRepository<UserSettings>
 {
     Task<bool> UserExsistAsync(long userId);
     Task<UserSettings?> GetUserSettingsAsync(long userId);
@@ -17,6 +17,6 @@ public interface IUserSettingsRepository
     Task UpdateExcludeBillboardsAsync(long userId, List<BillboardTypes> billboardTypes);
     Task UpdateExcludeEventTypesAsync(long userId, List<EventTypes> eventTypes);
     Task UpdateExcludeDaysOfWeekAsync(long userId, List<DayOfWeek> dayOfWeeks);
-    Task UpdateExcludePlacesIds(long userId, List<int> placesIds);
-    Task UpdateAddHolidays(long userId, bool addHolidays);
+    Task UpdateExcludePlacesIdsAsync(long userId, List<int> placesIds);
+    Task UpdateAddHolidaysAsync(long userId, bool addHolidays);
 }

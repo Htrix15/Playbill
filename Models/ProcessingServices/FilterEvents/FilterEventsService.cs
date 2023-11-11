@@ -11,8 +11,8 @@ public class FilterEventsService
         Dictionary<EventTypes, HashSet<string>> excludeEventsNamesTerms) =>
         events.Where(@event =>
         {
-            var validPlace = !excludePlacesTerms.Any(excludePlacesTerm => @event.Place.Contains(excludePlacesTerm, StringComparison.CurrentCultureIgnoreCase)) 
-                && ((allPlaces ?? false) || inclidePlaces.Any(inclidePlace => @event.Place.Contains(inclidePlace, StringComparison.CurrentCultureIgnoreCase)));
+            var validPlace = !excludePlacesTerms.Any(excludePlacesTerm => @event.Place.Equals(excludePlacesTerm, StringComparison.CurrentCultureIgnoreCase)) 
+                && ((allPlaces ?? false) || inclidePlaces.Any(inclidePlace => @event.Place.Equals(inclidePlace, StringComparison.CurrentCultureIgnoreCase)));
             var now = DateTime.Now;
             var nowDateOnly = new DateOnly(now.Year, now.Month, now.Day);
             var validTime = (@event.Dates is null && @event.EstimatedDates is not null)
@@ -22,7 +22,7 @@ public class FilterEventsService
             if (excludeEventsNamesTerms.TryGetValue(@event.Type, out var excludeNames))
             {
                 validName = excludeNames.Any(name => @event.Title?.Contains(name) ?? true);
-            }
+            }      
             return validPlace && validName && validTime;
         }).ToList();
 }

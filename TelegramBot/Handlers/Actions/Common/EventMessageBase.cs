@@ -1,10 +1,12 @@
 ﻿using Models.Events;
+using Models.Places;
 using Models.ProcessingServices.EventDateIntervals.Common.Enums;
 using System.Diagnostics;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types;
 using TelegramBot.Extensions;
 using TelegramBot.Helpers;
+using TelegramBot.Params;
 using TelegramBot.Services;
 
 namespace TelegramBot.Handlers.Actions.Common;
@@ -12,16 +14,19 @@ namespace TelegramBot.Handlers.Actions.Common;
 public abstract class EventMessageBase : MessageBase
 {
     protected readonly EventService _eventService;
+    private readonly IPlaceRepository _placeRepository;
     protected readonly DatePeriods _datePeriod;
     private readonly int _limitMessagePerSeconds;
     public EventMessageBase(MessageService messageService, 
         EventService eventService, 
         DatePeriods datePeriod,
-        int limitMessagePerSeconds) : base(messageService)
+        int limitMessagePerSeconds,
+        IPlaceRepository placeRepository) : base(messageService)
     {
         _eventService = eventService;
         _datePeriod = datePeriod;
         _limitMessagePerSeconds = limitMessagePerSeconds;
+        _placeRepository = placeRepository;
     }
     public override async Task CreateMessages(Update update)
     {
@@ -48,7 +53,7 @@ public abstract class EventMessageBase : MessageBase
                 sentEventCount++;
                 await _messageService.SendMessageWithPhotoAsync(@params.ChatId, caption, @event.ImagePath, buttons, false);
             }
-  
+
             sentEventCount++;
             if (sentEventCount == _limitMessagePerSeconds)
             {
@@ -63,7 +68,19 @@ public abstract class EventMessageBase : MessageBase
             }
         }
         sendingTimeControl.Stop();
-        await _messageService.SendMessageAsync(@params.ChatId, "Поиск завершен!", MarkupHelper.GetStartButtons());
+
+        var places = await _placeRepository.GetPlacesAsync(events.Select(@event => @event.Place).Distinct());
+
+        var toogleButtons = MarkupHelper.CreateToogleButtons(places.Select(place => new UserSettingsParams.Setting() { 
+            Id = place.Id, 
+            Label = place.Name 
+        }).ToList(), CommandKeyHelper.Create(AddUserPlacesExcludes.GetCommand()));
+
+        await _messageService.SendMessageAsync(@params.ChatId, "Поиск завершен!" +
+            "\nОтметьте те места, откуда вы больше не хотите видить события." +
+            "\nВ настройках можно будет вернуть обратно", toogleButtons.ToInlineKeyboardMarkup());
+
+        await _messageService.SendMessageAsync(@params.ChatId, "Что дальше?", MarkupHelper.GetStartButtons());
     }
 
     private string GetCaptionFromEvent(Event @event)
