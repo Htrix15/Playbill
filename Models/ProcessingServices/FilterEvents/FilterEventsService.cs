@@ -4,12 +4,11 @@ namespace Models.ProcessingServices.FilterEvents;
 
 public class FilterEventsService
 {
-
     public IList<Event> FilterEvents(IList<Event> events,
         bool? allPlaces,
         HashSet<string> excludePlacesTerms,
         HashSet<string> inclidePlaces,
-        Dictionary<EventTypes, HashSet<string>>? excludeEventsNamesTerms) =>
+        Dictionary<EventTypes, HashSet<string>> excludeEventsNamesTerms) =>
         events.Where(@event =>
         {
             var validPlace = !excludePlacesTerms.Any(excludePlacesTerm => @event.Place.Contains(excludePlacesTerm, StringComparison.CurrentCultureIgnoreCase)) 

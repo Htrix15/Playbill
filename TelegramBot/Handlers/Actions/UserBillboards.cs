@@ -23,9 +23,17 @@ public class UserBillboards : SettingsMessageBase
     public override async Task CreateMessages(Update update)
     {
         var userSettingsParams = update.GetUserSettingsParams();
+        var settings = _searchOptions.SupportedBillboards?.Select(ConverFunctions<BillboardTypes>()).ToList() ?? new List<Params.UserSettingsParams.Setting>();
 
-        var settings = _searchOptions.SupportedBillboards.Select(ConverFunctions<BillboardTypes>()).ToList();
-        var userExcludes = await _userSettingsRepository.GetExcludeBillboardsAsync(userSettingsParams.UserId);
+        var userExcludes = new List<BillboardTypes>();
+        if (await _userSettingsRepository.UserExsistAsync(userSettingsParams.UserId))
+        {
+            userExcludes = await _userSettingsRepository.GetExcludeBillboardsAsync(userSettingsParams.UserId) ?? userExcludes;
+        } 
+        else
+        {
+            userExcludes = _searchOptions.ExcludeBillboards?.ToList() ?? new List<BillboardTypes>();
+        }
 
         SetExclude(userExcludes, settings);
       
@@ -47,7 +55,9 @@ public class UserBillboards : SettingsMessageBase
             var updateUserSettingsParams = update.GetUpdateUserSettingsParams();
 
             var userId = updateUserSettingsParams.UserId;
-            var excludes = await _userSettingsRepository.GetExcludeBillboardsAsync(userId);
+            var excludes = await _userSettingsRepository.GetExcludeBillboardsAsync(userId) 
+                ?? _searchOptions.ExcludeBillboards?.ToList()
+                ?? new List<BillboardTypes>();
             var key = Enum.Parse<BillboardTypes>(updateUserSettingsParams.EntityId);
             if (updateUserSettingsParams.Exclude)
             {

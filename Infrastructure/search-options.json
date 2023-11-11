@@ -1,6 +1,7 @@
 {
   "DefaultSearchOptions": {
     "SupportedBillboards": [ "Kassir", "Ya", "Bezantracta", "Quickticket", "Eventhall", "Ticketvrn" ],
+    "ExcludeBillboards": [ "Eventhall" ],
     "SearchEventTypes": [
       "Theater",
       "Concert",
@@ -16,12 +17,8 @@
       "Quests",
       "MasterClasses"
     ],
-    "ExcludePlacesTerms": [ "онлайн", "кино" ],
+    "ExcludeSearchEventTypes": [ "Children", "Quests" ],
     "AllPlaces": true,
-    "ExcludeEventsNamesTerms": {
-      "Education": [ "Годовая подписка", "онлайн-платфор", "онлайн-курс" ],
-      "Other": [ "Годовая подписка", "онлайн-платфор", "онлайн-курс" ]
-    },
     "DaysOfWeek": [
       "Sunday",
       "Monday",
@@ -31,7 +28,6 @@
       "Friday",
       "Saturday"
     ],
-    "DatePeriod": "ThisYear",
     "AddHolidays": true
   }
 }

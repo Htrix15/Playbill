@@ -55,7 +55,7 @@ public class MainService
 
         var intervals = await _eventDateIntervalsService
             .GetDateIntervalsAsync(userSearchOptions.DaysOfWeek!,
-            userSearchOptions!.DatePeriod,
+            userSearchOptions?.DatePeriod ?? EventDateIntervals.Common.Enums.DatePeriods.ThisWeek,
             userSearchOptions.StartDate,
             userSearchOptions.EndDate,
             userSearchOptions.AddHolidays ?? false);
@@ -67,9 +67,9 @@ public class MainService
         _placesService.ReplacePlaceToSynonyms(events, placesSynonyms);
 
         events = _filterEventsService.FilterEvents(events, userSearchOptions.AllPlaces,
-            userSearchOptions.ExcludePlacesTerms!,
+            userSearchOptions?.ExcludePlacesTerms ?? new HashSet<string>(),
             places.Select(p => p.Name).ToHashSet(),
-            userSearchOptions.ExcludeEventsNamesTerms);
+            userSearchOptions?.ExcludeEventsNamesTerms ?? new Dictionary<EventTypes, HashSet<string>>());
 
         events = _eventsGroupingService.EventsGrouping(events);
 

@@ -7,7 +7,9 @@ namespace Models.Search;
 public class SearchOptions : ICloneable
 {
     public HashSet<BillboardTypes>? SupportedBillboards { get; set; }
+    public HashSet<BillboardTypes>? ExcludeBillboards { get; set; }
     public HashSet<EventTypes>? SearchEventTypes { get; set; }
+    public HashSet<EventTypes>? ExcludeSearchEventTypes { get; set; }
     public HashSet<string>? ExcludePlacesTerms { get; set; }
     public bool? AllPlaces { get; set; }
     public Dictionary<EventTypes, HashSet<string>>? ExcludeEventsNamesTerms { get; set; }

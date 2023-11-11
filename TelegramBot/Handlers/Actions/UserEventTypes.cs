@@ -23,8 +23,18 @@ public class UserEventTypes : SettingsMessageBase
     public override async Task CreateMessages(Update update)
     {
         var userSettingsParams = update.GetUserSettingsParams();
-        var settings = _searchOptions.SearchEventTypes.Select(ConverFunctions<EventTypes>()).ToList();
-        var userExcludes = await _userSettingsRepository.GetExcludeEventTypesAsync(userSettingsParams.UserId);
+        var settings = _searchOptions.SearchEventTypes?.Select(ConverFunctions<EventTypes>()).ToList() ?? new List<Params.UserSettingsParams.Setting>();
+        
+        var userExcludes = new List<EventTypes>();
+        if (await _userSettingsRepository.UserExsistAsync(userSettingsParams.UserId))
+        {
+            userExcludes = await _userSettingsRepository.GetExcludeEventTypesAsync(userSettingsParams.UserId) ?? userExcludes;
+        } 
+        else
+        {
+            userExcludes = _searchOptions.ExcludeSearchEventTypes?.ToList() ?? new List<EventTypes>();
+        }
+
         SetExclude(userExcludes, settings);
 
         await CreateMessages(userSettingsParams, settings);
@@ -43,7 +53,9 @@ public class UserEventTypes : SettingsMessageBase
         {
             var updateUserSettingsParams = update.GetUpdateUserSettingsParams();
             var userId = updateUserSettingsParams.UserId;
-            var excludes = await _userSettingsRepository.GetExcludeEventTypesAsync(userId);
+            var excludes = await _userSettingsRepository.GetExcludeEventTypesAsync(userId)
+                ?? _searchOptions.ExcludeSearchEventTypes?.ToList() 
+                ?? new List<EventTypes>();
             var key = Enum.Parse<EventTypes>(updateUserSettingsParams.EntityId);
             if (updateUserSettingsParams.Exclude)
             {

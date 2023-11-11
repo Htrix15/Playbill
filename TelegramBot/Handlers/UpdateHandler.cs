@@ -42,6 +42,7 @@ public class UpdateHandler : IUpdateHandler
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"{ex.Message}\n{ex.StackTrace}");
             await _messageService.SendMessageAsync(update.CallbackQuery?.Message?.Chat.Id ?? update?.Message?.Chat.Id ?? throw new Exception("ChatId not found"),
                "Что-то пошло не так :(");
         }

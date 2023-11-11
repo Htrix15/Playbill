@@ -5,10 +5,11 @@ namespace Models.Users;
 
 public interface IUserSettingsRepository
 {
-    Task<UserSettings> GetUserSettingsAsync(long userId);
+    Task<bool> UserExsistAsync(long userId);
+    Task<UserSettings?> GetUserSettingsAsync(long userId);
 
-    Task<List<BillboardTypes>> GetExcludeBillboardsAsync(long userId);
-    Task<List<EventTypes>> GetExcludeEventTypesAsync(long userId);
+    Task<List<BillboardTypes>?> GetExcludeBillboardsAsync(long userId);
+    Task<List<EventTypes>?> GetExcludeEventTypesAsync(long userId);
     Task<List<DayOfWeek>> GetExcludeDaysOfWeekAsync(long userId);
     Task<List<int>> GetExcludePlacesIdsAsync(long userId);
     Task<bool> GetAddHolidaysAsync(long userId);
