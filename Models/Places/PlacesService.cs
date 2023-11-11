@@ -35,8 +35,9 @@ public class PlacesService
         var allPlacesNames = places.SelectMany(place => place.Synonyms.Select(synonym => synonym.Name)).ToList();
         allPlacesNames.AddRange(places.Select(place => place.Name));
 
-        var eventPlacesNames = events.Select(@event => @event.Place).Distinct().ToList();
-
+        var eventPlacesNames = events.Where(@event => !@event.SplitPlace).Select(@event => @event.Place).Distinct().ToList();
+        eventPlacesNames.AddRange(events.Where(@event => @event.SplitPlace).SelectMany(@event => @event.Place.Split(" | ")));
+        eventPlacesNames = eventPlacesNames.Distinct().ToList();
         var newPlacesNames = eventPlacesNames.Except(allPlacesNames);
         if (newPlacesNames.Any())
         {

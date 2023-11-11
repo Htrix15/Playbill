@@ -153,7 +153,7 @@ public class EventsGroupingService
                 var places = new List<string>() { newEvent.Place };
                 places.AddRange(foundEvents.Select(@event => @event.Place));
                 newEvent.Place = string.Join(" | ", places.Distinct());
-
+                newEvent.SplitPlace = places.Distinct().Count() > 1;
                 foreach (var @event in foundEvents)
                 {
                     events.Remove(@event);
