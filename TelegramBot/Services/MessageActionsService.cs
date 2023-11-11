@@ -38,8 +38,10 @@ public class MessageActionsService
 
         GetEvents.Add(new ThisWeekEvents(_messageService, _eventService));
         GetEvents.Add(new NextWeekEvents(_messageService, _eventService));
+        GetEvents.Add(new ThisAndNextWeekEvents(_messageService, _eventService));
         GetEvents.Add(new ThisMonthEvents(_messageService, _eventService));
         GetEvents.Add(new Next30DaysEvents(_messageService, _eventService));
+        GetEvents.Add(new Next60DaysEvents(_messageService, _eventService));
         GetEvents.Add(new ThisYearEvents(_messageService, _eventService));
     }
 

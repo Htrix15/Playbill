@@ -19,7 +19,9 @@ public class Search : NavigationMessage
     {
         new[]{ InlineKeyboardButton.WithCallbackData("На этой неделе", ThisWeekEvents.GetCommand()) },
         new[]{ InlineKeyboardButton.WithCallbackData("На следующей неделе", NextWeekEvents.GetCommand()) },
+        new[]{ InlineKeyboardButton.WithCallbackData("На этой и следующей неделе", ThisAndNextWeekEvents.GetCommand()) },
         new[]{ InlineKeyboardButton.WithCallbackData("Ближайшие 30 дней", Next30DaysEvents.GetCommand()) },
+        new[]{ InlineKeyboardButton.WithCallbackData("Ближайшие 60 дней", Next60DaysEvents.GetCommand()) },
         new[]{ InlineKeyboardButton.WithCallbackData("До конца месяца", ThisMonthEvents.GetCommand()) },
         new[]{ InlineKeyboardButton.WithCallbackData("До конца года", ThisYearEvents.GetCommand()) },
         MarkupHelper.Settings

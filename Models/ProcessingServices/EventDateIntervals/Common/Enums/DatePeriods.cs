@@ -5,7 +5,9 @@ public enum DatePeriods
 {
     ThisWeek,
     NextWeek,
+    ThisAndNextWeek,
     ThisMonth,
     Next30Days,
+    Next60Days,
     ThisYear
 }

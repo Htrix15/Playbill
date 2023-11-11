@@ -1,7 +1,6 @@
 ﻿using Models.Search;
 using Models.Users;
 using TelegramBot.Handlers.Actions.Common;
-using TelegramBot.Params;
 using TelegramBot.Services;
 using Telegram.Bot.Types;
 using TelegramBot.Extensions;

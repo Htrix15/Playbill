@@ -134,8 +134,10 @@ public class EventDateIntervalsService : IGetEventDateIntervals
             {
                 DatePeriods.ThisWeek => minDate,
                 DatePeriods.NextWeek => minDate.NearestDayOfWeek(DayOfWeek.Monday).AddDays(minDate.DayOfWeek == DayOfWeek.Monday ? 7 : 0),
+                DatePeriods.ThisAndNextWeek => minDate,
                 DatePeriods.ThisMonth => minDate,
                 DatePeriods.Next30Days => minDate,
+                DatePeriods.Next60Days => minDate,
                 DatePeriods.ThisYear => minDate,
                 _ => throw new NotImplementedException(),
             };
@@ -144,8 +146,10 @@ public class EventDateIntervalsService : IGetEventDateIntervals
             {
                 DatePeriods.ThisWeek => minDate.NearestDayOfWeek(DayOfWeek.Monday).AddDays(minDate.DayOfWeek == DayOfWeek.Monday ? 6 : -1),
                 DatePeriods.NextWeek => minDate.AddDays(6),
+                DatePeriods.ThisAndNextWeek => minDate.AddDays(13),
                 DatePeriods.ThisMonth => new DateTime(minDate.Year, minDate.Month, DateTime.DaysInMonth(minDate.Year, minDate.Month)),
                 DatePeriods.Next30Days => minDate.AddDays(30),
+                DatePeriods.Next60Days => minDate.AddDays(60),
                 DatePeriods.ThisYear => new DateTime(minDate.Year, 12, 31),
                 _ => throw new NotImplementedException(),
             };
