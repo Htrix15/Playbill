@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using Models.Search;
 using Models.Users;
+using TelegramBot.Configurations;
 using TelegramBot.Handlers.Actions;
 using TelegramBot.Handlers.Actions.Common;
 
@@ -11,18 +12,21 @@ public class MessageActionsService
     private readonly MessageService _messageService;
     private readonly EventService _eventService;
     private readonly SearchOptions _searchOptions;
+    private readonly BotConfiguration _botConfiguration;
     private readonly IUserSettingsRepository _userSettingsRepository;
 
     private readonly List<MessageBase> NavigationMessage = new();
     private readonly List<SettingsMessageBase> UserSettings = new();
     private readonly List<EventMessageBase> GetEvents = new();
 
-    public MessageActionsService(IOptions<SearchOptions> defaultOptions, 
+    public MessageActionsService(IOptions<SearchOptions> defaultOptions,
+        IOptions<BotConfiguration> botConfiguration,
         MessageService messageService,
         EventService eventService,
         IUserSettingsRepository userSettingsRepository)
     {
         _searchOptions = defaultOptions.Value;
+        _botConfiguration = botConfiguration.Value;
         _userSettingsRepository = userSettingsRepository;
         _messageService = messageService;
         _eventService = eventService;
@@ -36,13 +40,13 @@ public class MessageActionsService
         UserSettings.Add(new UserDaysOfWeek(_messageService, _searchOptions, _userSettingsRepository));
         UserSettings.Add(new UserAddHolidays(_messageService, _searchOptions, _userSettingsRepository));
 
-        GetEvents.Add(new ThisWeekEvents(_messageService, _eventService));
-        GetEvents.Add(new NextWeekEvents(_messageService, _eventService));
-        GetEvents.Add(new ThisAndNextWeekEvents(_messageService, _eventService));
-        GetEvents.Add(new ThisMonthEvents(_messageService, _eventService));
-        GetEvents.Add(new Next30DaysEvents(_messageService, _eventService));
-        GetEvents.Add(new Next60DaysEvents(_messageService, _eventService));
-        GetEvents.Add(new ThisYearEvents(_messageService, _eventService));
+        GetEvents.Add(new ThisWeekEvents(_messageService, _eventService, _botConfiguration.LimitMessagePerSeconds));
+        GetEvents.Add(new NextWeekEvents(_messageService, _eventService, _botConfiguration.LimitMessagePerSeconds));
+        GetEvents.Add(new ThisAndNextWeekEvents(_messageService, _eventService, _botConfiguration.LimitMessagePerSeconds));
+        GetEvents.Add(new ThisMonthEvents(_messageService, _eventService, _botConfiguration.LimitMessagePerSeconds));
+        GetEvents.Add(new Next30DaysEvents(_messageService, _eventService, _botConfiguration.LimitMessagePerSeconds));
+        GetEvents.Add(new Next60DaysEvents(_messageService, _eventService, _botConfiguration.LimitMessagePerSeconds));
+        GetEvents.Add(new ThisYearEvents(_messageService, _eventService, _botConfiguration.LimitMessagePerSeconds));
     }
 
 

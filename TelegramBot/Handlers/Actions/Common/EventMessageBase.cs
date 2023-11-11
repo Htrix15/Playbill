@@ -1,5 +1,7 @@
 ﻿using Models.Events;
 using Models.ProcessingServices.EventDateIntervals.Common.Enums;
+using System.Diagnostics;
+using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types;
 using TelegramBot.Extensions;
 using TelegramBot.Helpers;
@@ -11,13 +13,15 @@ public abstract class EventMessageBase : MessageBase
 {
     protected readonly EventService _eventService;
     protected readonly DatePeriods _datePeriod;
-
+    private readonly int _limitMessagePerSeconds;
     public EventMessageBase(MessageService messageService, 
         EventService eventService, 
-        DatePeriods datePeriod) : base(messageService)
+        DatePeriods datePeriod,
+        int limitMessagePerSeconds) : base(messageService)
     {
         _eventService = eventService;
         _datePeriod = datePeriod;
+        _limitMessagePerSeconds = limitMessagePerSeconds;
     }
     public override async Task CreateMessages(Update update)
     {
@@ -26,13 +30,39 @@ public abstract class EventMessageBase : MessageBase
         await _messageService.SendMessageAsync(@params.ChatId, "Начат поиск событий...");
 
         var events = await _eventService.GetEvents(@params);
+        var sentEventCount = 0;
+        var sendingTimeControl = new Stopwatch();
+        sendingTimeControl.Start();
         foreach (var @event in events)
         {
             var caption = GetCaptionFromEvent(@event);
             var buttons = MarkupHelper.GetEventButtons(@event.Links);
-            await _messageService.SendMessageWithPhotoAsync(@params.ChatId, caption, @event.ImagePath, buttons, false);
-
+            try
+            {
+                await _messageService.SendMessageWithPhotoAsync(@params.ChatId, caption, @event.ImagePath, buttons, false);
+            }
+            catch (ApiRequestException exception) when (exception.ErrorCode == 429)
+            {
+                await Task.Delay(1000 * exception.Parameters?.RetryAfter ?? 1);
+                await _messageService.SendMessageAsync(@params.ChatId, "Телеге устала и попросила немного отдохнуть :(");
+                sentEventCount++;
+                await _messageService.SendMessageWithPhotoAsync(@params.ChatId, caption, @event.ImagePath, buttons, false);
+            }
+  
+            sentEventCount++;
+            if (sentEventCount == _limitMessagePerSeconds)
+            {
+                sendingTimeControl.Stop();
+                int elapsedMilliseconds = (int)sendingTimeControl.ElapsedMilliseconds;
+                if (elapsedMilliseconds < 1000)
+                {
+                    await Task.Delay(1000 - elapsedMilliseconds + 100);
+                }
+                sentEventCount = 0;
+                sendingTimeControl.Restart();
+            }
         }
+        sendingTimeControl.Stop();
         await _messageService.SendMessageAsync(@params.ChatId, "Поиск завершен!", MarkupHelper.GetStartButtons());
     }
 

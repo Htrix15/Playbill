@@ -6,7 +6,8 @@ namespace TelegramBot.Handlers.Actions;
 
 public class Next60DaysEvents : EventMessageBase
 {
-    public Next60DaysEvents(MessageService messageService, EventService eventService) : base(messageService, eventService, DatePeriods.Next60Days)
+    public Next60DaysEvents(MessageService messageService, EventService eventService, int limitMessagePerSeconds) 
+        : base(messageService, eventService, DatePeriods.Next60Days, limitMessagePerSeconds)
     {
     }
 

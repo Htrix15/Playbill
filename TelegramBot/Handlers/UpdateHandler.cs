@@ -6,6 +6,7 @@ using TelegramBot.Services;
 using TelegramBot.Handlers.Actions.Common;
 using TelegramBot.Extensions;
 using TelegramBot.Exceptions;
+using TelegramBot.Helpers;
 
 namespace TelegramBot.Handles;
 
@@ -37,14 +38,23 @@ public class UpdateHandler : IUpdateHandler
         }
         catch (NotFoundCommandException)
         {
-            await _messageService.SendMessageAsync(update.CallbackQuery?.Message?.Chat.Id ?? update?.Message?.Chat.Id ?? throw new Exception("ChatId not found"),
-                "Бот не знает такой команды :(");
+            var chatId = update.CallbackQuery?.Message?.Chat.Id ?? update?.Message?.Chat.Id ?? throw new Exception("ChatId not found");
+            await _messageService.SendMessageAsync(chatId, 
+                "Бот не знает такой команды :(", 
+                MarkupHelper.GetStartButtons());
+        }
+        catch (ApiRequestException exception) when (exception.ErrorCode == 429)
+        {
+            await Task.Delay(1000 * exception.Parameters?.RetryAfter ?? 1, cancellationToken);
+            throw exception;
         }
         catch (Exception ex)
         {
             Console.WriteLine($"{ex.Message}\n{ex.StackTrace}");
-            await _messageService.SendMessageAsync(update.CallbackQuery?.Message?.Chat.Id ?? update?.Message?.Chat.Id ?? throw new Exception("ChatId not found"),
-               "Что-то пошло не так :(");
+            var chatId = update.CallbackQuery?.Message?.Chat.Id ?? update?.Message?.Chat.Id ?? throw new Exception("ChatId not found");
+            await _messageService.SendMessageAsync(chatId,
+               "Что-то пошло не так :(", 
+               MarkupHelper.GetStartButtons());
         }
     }
 

@@ -6,7 +6,8 @@ namespace TelegramBot.Handlers.Actions;
 
 public class ThisYearEvents : EventMessageBase
 {
-    public ThisYearEvents(MessageService messageService, EventService eventService) : base(messageService, eventService, DatePeriods.ThisYear)
+    public ThisYearEvents(MessageService messageService, EventService eventService, int limitMessagePerSeconds) 
+        : base(messageService, eventService, DatePeriods.ThisYear, limitMessagePerSeconds)
     {
     }
     public override string Command => GetCommand();

@@ -1,5 +1,6 @@
 {
   "BotConfiguration": {
-    "Token": ""
+    "Token": "",
+    "LimitMessagePerSeconds": 5
   }
 }

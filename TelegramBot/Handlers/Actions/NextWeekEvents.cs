@@ -6,7 +6,8 @@ namespace TelegramBot.Handlers.Actions;
 
 public class NextWeekEvents : EventMessageBase
 {
-    public NextWeekEvents(MessageService messageService, EventService eventService) : base(messageService, eventService, DatePeriods.NextWeek)
+    public NextWeekEvents(MessageService messageService, EventService eventService, int limitMessagePerSeconds) 
+        : base(messageService, eventService, DatePeriods.NextWeek, limitMessagePerSeconds)
     {
     }
     public override string Command => GetCommand();
