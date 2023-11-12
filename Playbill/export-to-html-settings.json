@@ -2,6 +2,7 @@
   "ExportToHtml": {
     "OutputFolder": "D:\\Events",
     "CssFilePath": "./ExportToHtml/style.css",
-    "OutputHtmlFileName": "index.html"
+    "OutputHtmlFileName": "index.html",
+    "OpenFileAfterCreate": true
   }
 }

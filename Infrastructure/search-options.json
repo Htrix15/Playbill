@@ -1,7 +1,33 @@
 {
   "DefaultSearchOptions": {
+    /*
+      Suported SupportedBillboards
+        "Kassir", 
+        "Ya", 
+        "Bezantracta", 
+        "Quickticket", 
+        "Eventhall", 
+        "Ticketvrn"
+    */
+
     "SupportedBillboards": [ "Kassir", "Ya", "Bezantracta", "Quickticket", "Eventhall", "Ticketvrn" ],
-    "ExcludeBillboards": [ ],
+    "ExcludeBillboards": [],
+    /* 
+      EventTypes: 
+        "Theater",
+        "Concert",
+        "Sport",
+        "Festival",
+        "Education",
+        "Museum",
+        "Show",
+        "Children",
+        "Tourism",
+        "Other",
+        "Unidentified",
+        "Quests",
+        "MasterClasses"
+    */
     "SearchEventTypes": [
       "Theater",
       "Concert",
@@ -17,8 +43,18 @@
       "Quests",
       "MasterClasses"
     ],
-    "ExcludeSearchEventTypes": [ "Children", "Quests" ],
+    "ExcludeSearchEventTypes": [],
     "AllPlaces": true,
+    /*
+      Suported DaysOfWeek:
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday"
+    */
     "DaysOfWeek": [
       "Sunday",
       "Monday",
@@ -28,6 +64,18 @@
       "Friday",
       "Saturday"
     ],
-    "AddHolidays": true
+    "AddHolidays": true,
+    "ExcludePlacesTerms": [ ],
+    /*
+      Suported DatePeriod:
+        "ThisWeek",
+        "NextWeek",
+        "ThisAndNextWeek",
+        "ThisMonth",
+        "Next30Days",
+        "Next60Days",
+        "ThisYear"
+    */
+    "DatePeriod": "ThisAndNextWeek"
   }
 }

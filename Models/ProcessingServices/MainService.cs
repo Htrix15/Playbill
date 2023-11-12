@@ -48,9 +48,18 @@ public class MainService
     {
         var places = await _placesService.GetPlacesAsync();
         var placesSynonyms = _placesService.GetPlaceSynonyms(places);
-        
-        if (overlayOptions) { 
+
+        if (overlayOptions)
+        {
             userSearchOptions = OverlayOptions(userSearchOptions);
+        }
+        if (userSearchOptions.ExcludeBillboards?.Any() ?? false)
+        {
+            userSearchOptions.SupportedBillboards = userSearchOptions.SupportedBillboards.Except(_searchOptions.ExcludeBillboards).ToHashSet();
+        }
+        if (userSearchOptions.ExcludeSearchEventTypes?.Any() ?? false)
+        {
+            userSearchOptions.SearchEventTypes = userSearchOptions.SearchEventTypes.Except(_searchOptions.ExcludeSearchEventTypes).ToHashSet();
         }
 
         var intervals = await _eventDateIntervalsService

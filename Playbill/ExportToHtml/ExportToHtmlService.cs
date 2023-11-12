@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 using Models.Events;
+using System.Diagnostics;
 
 namespace ConsoleApp.ExportToHtml;
 
@@ -85,5 +86,18 @@ public class ExportToHtmlService
             Path.Combine(_options.OutputFolder,
             Path.GetFileName(_options.CssFilePath)),
             true);
+
+        if (_options.OpenFileAfterCreate)
+        {
+            var process = new Process
+            {
+                StartInfo = new ProcessStartInfo()
+                {
+                    UseShellExecute = true,
+                    FileName = path
+                }
+            };
+            process.Start();
+        }
     }
 }
