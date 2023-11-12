@@ -29,106 +29,65 @@ public class Service : PageParseService
         var timeFormat = options.TimeFormat;
 
         var result = new List<Event>();
-        foreach (var eventKeys in filteredEventKeys)
+
+        try
         {
-            foreach (var eventKey in eventKeys.Value)
+            var web = new HtmlWeb();
+
+            var doc = await web.LoadFromWebAsync(baseSearchUrl);
+
+            var afishaItems = doc.DocumentNode.SelectNodes(options.ItemsXPath);//options.ItemsContainerXPath);
+            foreach (var afishaItem in afishaItems)
             {
                 try
                 {
-                    var web = new HtmlWeb();
+                    var dateItem = afishaItem.SelectSingleNode(options.EventDateXPath);
+                    var timeItem = afishaItem.SelectSingleNode(options.EventTimeXPath);
+                    var time = DateTime.ParseExact(timeItem.InnerText.Trim().Split(" ")[1], timeFormat, CultureInfo.CurrentCulture);
+                    var date = DateTime.ParseExact(dateItem.InnerText.Trim().Replace(",",""), dateFormat, CultureInfo.CurrentCulture).AddHours(time.Hour).AddMinutes(time.Minute);
+   
+                    var eventType = EventTypes.Unidentified;
 
-                    var doc = await web.LoadFromWebAsync(baseSearchUrl + eventKey);
+                    var nameItem = afishaItem.SelectSingleNode(options.EventTitleXPath);
+                    var title = nameItem.InnerText.Trim()
+                        .Replace("&quot;", "\"")
+                        .Replace("&#171;", "«")
+                        .Replace("&#187;", "»")
+                        .Replace("&amp;", "&");
+                    var link = afishaItem.SelectSingleNode("a").Attributes["href"].Value;
 
-                    var fullAfisha = doc.DocumentNode.SelectSingleNode(options.ItemsContainerXPath);
-                    if (fullAfisha == null)
+                    var imageItem = afishaItem.SelectSingleNode(options.EventImageXPath);
+                    var imagePath = imageItem.Attributes["data-original"].Value;
+
+                    result.Add(new Event()
                     {
-                        continue;
-                    }
-                    var afishaItems = fullAfisha.SelectNodes(options.ItemsXPath);
-                    if (afishaItems == null)
-                    {
-                        continue;
-                    }
-                    foreach (var afishaItem in afishaItems)
-                    {
-                        try
-                        {
-                            var dateTimeItem = afishaItem.SelectSingleNode(options.EventDiteTimeXPath);
-                            if (dateTimeItem == null)
+                        Billboard = BillboardType,
+                        Type = eventType,
+                        Dates = new List<DateTime>() { date },
+                        Title = title,
+                        NormilizeTitle = _titleNormalizationService.TitleNormalization(title),
+                        NormilizeTitleTerms = _titleNormalizationService.CreateTitleNormalizationTerms(title),
+                        ImagePath = imagePath,
+                        Place = place,
+                        Links = new List<EventLink>()
                             {
-                                continue;
-                            }
-                            var dates = new List<DateTime>();
-                            var dateItem = dateTimeItem.SelectSingleNode(options.EventDateXPath);
-                            var dateSourceItems = dateItem.InnerText.Trim().Replace(",", "").Split(' ');
-                            var dateSourceLength = dateSourceItems.Length;
-                            var datesSources = dateSourceLength <= 4
-                                //for parse 02 октября 2023, понедельник 
-                                ? new List<string>() { $"{dateSourceItems[0]} {dateSourceItems[1]} {dateSourceItems[2]}" }
-                                //for parse 18, 19, 20 августа 2023
-                                : dateSourceItems.Take(dateSourceLength - 2).Select(date => $"{date} {dateSourceItems[dateSourceLength - 2]} {dateSourceItems[dateSourceLength - 1]}");
-                           
-                            var timeItem = dateTimeItem.SelectSingleNode(options.EventTimeXPath);
-                            var time = DateTime.ParseExact(timeItem.InnerText.Trim(), timeFormat, CultureInfo.CurrentCulture);
-
-                            foreach (var dateSource in datesSources)
-                            {
-                                var date = DateTime.ParseExact(dateSource, dateFormat, CultureInfo.CurrentCulture).AddHours(time.Hour).AddMinutes(time.Minute);
-                                var chackDate = new DateOnly(date.Year, date.Month, date.Day);
-
-                                if (eventDateIntervals.Any(eventDateInterval => chackDate >= eventDateInterval.StartDate 
-                                    && chackDate <= eventDateInterval.EndDate
-                                    && date > DateTime.Now))
+                                new EventLink()
                                 {
-                                    dates.Add(date);
+                                    BillboardType = BillboardType,
+                                    Path = link
                                 }
                             }
-
-                            if (!dates.Any()) { continue; }
-
-                            var eventType = eventKeys.Key;
-
-                            var nameItem = afishaItem.SelectSingleNode(options.EventTitleXPath);
-                            var title = nameItem.InnerText.Trim()
-                                .Replace("&quot;", "\"")
-                                .Replace("&#171;", "«")
-                                .Replace("&#187;", "»");
-                            var link = nameItem.Attributes["href"].Value;
-
-                            var imageItem = afishaItem.SelectSingleNode(options.EventImageXPath);
-                            var imagePath = imageItem.Attributes["src"].Value;
-
-                            result.Add(new Event()
-                            {
-                                Billboard = BillboardType,
-                                Type = eventType,
-                                Dates = dates,
-                                Title = title,
-                                NormilizeTitle = _titleNormalizationService.TitleNormalization(title),
-                                NormilizeTitleTerms = _titleNormalizationService.CreateTitleNormalizationTerms(title),
-                                ImagePath = imagePath,
-                                Place = place,
-                                Links = new List<EventLink>()
-                                {
-                                    new EventLink()
-                                    {
-                                        BillboardType = BillboardType,
-                                        Path = link
-                                    }
-                                }
-                            });
-                        }
-                        catch (Exception exception)
-                        {
-                            Console.WriteLine($"Fail parse items: {exception.Message}");
-                        }
-                    }
+                    });
                 }
                 catch (Exception exception)
                 {
-                    Console.WriteLine($"Fail parse page: {exception.Message}");
+                    Console.WriteLine($"Fail parse items: {exception.Message}");
                 }
             }
+        }
+        catch (Exception exception)
+        {
+            Console.WriteLine($"Fail parse page: {exception.Message}");
         }
 
         result = result.DateGrouping().ToList();
