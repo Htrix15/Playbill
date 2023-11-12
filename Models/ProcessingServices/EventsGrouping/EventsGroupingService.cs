@@ -145,7 +145,7 @@ public class EventsGroupingService
             if (foundEvents.Any())
             {
                 newEvent.Links.AddRange(foundEvents.SelectMany(@event => @event.Links));
-
+                newEvent.Links = newEvent.Links.DistinctBy(link => link.Path).ToList();
                 var titles = new List<string>() { newEvent.Title };
                 titles.AddRange(foundEvents.Select(@event => @event.Title));
                 newEvent.Title = titles.OrderByDescending(title => title.Length).First();
@@ -167,10 +167,33 @@ public class EventsGroupingService
         return result;
     }
 
+    private void SearchTime(List<Event> events)
+    {
+        var eventsWithoutTime = events.Where(@event => @event.Date.Value.Hour == 0 && @event.Date.Value.Minute == 0).ToList();
+        var eventsWithTime = events.Where(@event => @event.Date.Value.Hour != 0 || @event.Date.Value.Minute != 0).ToList();
+        eventsWithoutTime.ForEach(@eventWithoutTime =>
+        {
+            var donor = eventsWithTime.FirstOrDefault(@eventWithTime => @eventWithTime.Place == @eventWithoutTime.Place
+                && @eventWithTime.Date.Value.Date == @eventWithoutTime.Date.Value.Date
+                && TitleCompare(@eventWithTime, @eventWithoutTime));
+            if (donor != null)
+            {
+                var date = @eventWithoutTime.Dates.First();
+                date = date.AddHours(donor.Date.Value.Hour);
+                date = date.AddMinutes(donor.Date.Value.Minute);
+                @eventWithoutTime.Dates = new List<DateTime>() { date };
+            }
+        });
+    }
+
     public IList<Event> EventsGrouping(IList<Event> events)
     {
         var _events = EventDatePreparation(events.ToList());
 
+        if(_events.Any(@event => @event.Date.Value.Hour == 0 && @event.Date.Value.Minute == 0))
+        {
+            SearchTime(_events);
+        }
         var result = new List<Event>();
 
         _events.GroupBy(@event => @event.Date.Value.Date)
