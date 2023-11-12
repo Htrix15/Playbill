@@ -103,8 +103,7 @@
     "TimeFormat": "HH:mm",
     "ItemsXPath": "//div[contains(@class, 't778__wrapper')]",
     "EventTitleXPath": "div[contains(@class, 't778__content')]/a/div[contains(@class, 't778__textwrapper')]/div[contains(@class, 't778__title')]/strong",
-    "EventDateXPath": "div[contains(@class, 't778__content')]/a/div[contains(@class, 't778__textwrapper')]/div[contains(@class, 't778__descr t-descr')]/text()[1]",
-    "EventTimeXPath": "div[contains(@class, 't778__content')]/a/div[contains(@class, 't778__textwrapper')]/div[contains(@class, 't778__descr t-descr')]/text()[2]",
+    "EventDiteTimeXPath": "div[contains(@class, 't778__content')]/a/div[contains(@class, 't778__textwrapper')]/div[contains(@class, 't778__descr t-descr')]/text()",
     "EventImageXPath": "a/div[contains(@class, 't778__imgwrapper')]/div"
   },
   "Ticketvrn": {

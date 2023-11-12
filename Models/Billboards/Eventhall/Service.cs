@@ -19,9 +19,7 @@ public class Service : PageParseService
 
     public override async Task<IList<Event>> GetEventsAsync(IList<EventDateInterval> eventDateIntervals, HashSet<EventTypes> searchEventTypes)
     {
-        var options = (_options as Options);
-
-        var filteredEventKeys = EventKeys(searchEventTypes);
+        var options = (_options as Options);;
 
         var baseSearchUrl = options.BaseSearchUrl;
         var place = options.Place;
@@ -41,11 +39,16 @@ public class Service : PageParseService
             {
                 try
                 {
-                    var dateItem = afishaItem.SelectSingleNode(options.EventDateXPath);
-                    var timeItem = afishaItem.SelectSingleNode(options.EventTimeXPath);
-                    var time = DateTime.ParseExact(timeItem.InnerText.Trim().Split(" ")[1], timeFormat, CultureInfo.CurrentCulture);
-                    var date = DateTime.ParseExact(dateItem.InnerText.Trim().Replace(",",""), dateFormat, CultureInfo.CurrentCulture).AddHours(time.Hour).AddMinutes(time.Minute);
-   
+                    var dates = new List<DateTime>();
+                    var dateItems = afishaItem.SelectNodes(options.EventDiteTimeXPath);
+
+                    for (int i = 0; i < dateItems.Count(); i += 3)
+                    {
+                        var time = DateTime.ParseExact(dateItems[i + 1].InnerText.Trim().Split(" ")[1], timeFormat, CultureInfo.CurrentCulture);
+                        var date = DateTime.ParseExact(dateItems[i].InnerText.Trim().Replace(",", ""), dateFormat, CultureInfo.CurrentCulture).AddHours(time.Hour).AddMinutes(time.Minute);
+                        dates.Add(date);
+                    }
+
                     var eventType = EventTypes.Unidentified;
 
                     var nameItem = afishaItem.SelectSingleNode(options.EventTitleXPath);
@@ -63,7 +66,7 @@ public class Service : PageParseService
                     {
                         Billboard = BillboardType,
                         Type = eventType,
-                        Dates = new List<DateTime>() { date },
+                        Dates = dates,
                         Title = title,
                         NormilizeTitle = _titleNormalizationService.TitleNormalization(title),
                         NormilizeTitleTerms = _titleNormalizationService.CreateTitleNormalizationTerms(title),
