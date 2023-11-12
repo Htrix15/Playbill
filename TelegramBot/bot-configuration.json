@@ -1,6 +1,7 @@
 {
   "BotConfiguration": {
     "Token": "",
-    "LimitMessagePerSeconds": 5
+    "LimitMessagePerSeconds": 5,
+    "MaxButtonsCount":  80
   }
 }

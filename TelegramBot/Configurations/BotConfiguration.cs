@@ -4,4 +4,5 @@ public class BotConfiguration
 {
     public string? Token { get; set; }
     public int LimitMessagePerSeconds { get; set; }
+    public int MaxButtonsCount { get; set; }
 }
