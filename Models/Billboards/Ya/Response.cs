@@ -24,16 +24,22 @@ public class Response : IConvertToEvent<string>
                 {
                     date.Add(item.ScheduleInfo.Regularity.SingleShowtime.Value);
                 }
-                else if ((item.ScheduleInfo.Dates?.Any() ?? false) && (item.ScheduleInfo.Regularity?.Daily?.Any() ?? false))
+                else if (item.ScheduleInfo.Dates?.Any() ?? false)// && (item.ScheduleInfo.Regularity?.Daily?.Any() ?? false)
                 {
                     item.ScheduleInfo.Dates.ForEach(scheduleInfoDate =>
                     {
                         var eventDate = DateOnly.Parse(scheduleInfoDate);
-                        item.ScheduleInfo.Regularity.Daily.ForEach(time =>
+                        if (item.ScheduleInfo.Regularity.Daily.Any())
                         {
-                            var eventTime = TimeOnly.Parse(time);
-                            date.Add(new DateTime(eventDate.Year, eventDate.Month, eventDate.Day, eventTime.Hour, eventTime.Minute, 0));
-                        });
+                            item.ScheduleInfo.Regularity.Daily.ForEach(time =>
+                            {
+                                var eventTime = TimeOnly.Parse(time);
+                                date.Add(new DateTime(eventDate.Year, eventDate.Month, eventDate.Day, eventTime.Hour, eventTime.Minute, 0));
+                            });
+                        } else
+                        {
+                            date.Add(new DateTime(eventDate.Year, eventDate.Month, eventDate.Day));
+                        }
                     });      
                 }
                 else
