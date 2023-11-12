@@ -1,7 +1,7 @@
 {
   "DefaultSearchOptions": {
     "SupportedBillboards": [ "Kassir", "Ya", "Bezantracta", "Quickticket", "Eventhall", "Ticketvrn" ],
-    "ExcludeBillboards": [ "Eventhall" ],
+    "ExcludeBillboards": [ ],
     "SearchEventTypes": [
       "Theater",
       "Concert",
