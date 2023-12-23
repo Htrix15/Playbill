@@ -58,10 +58,20 @@ public class Service : PageParseService
                                 foreach (var dateItem in dateItems)
                                 {
                                     if (dateItem == null) { continue; }
-                                    var date = DateTime.ParseExact(dateItem.InnerText.Trim(), options.DateFormat, CultureInfo.CurrentCulture);
-                                    if (DateTime.Now.Month > 10 && date.Month < 3)
+                                    var dateItemText = dateItem.InnerText.Trim();
+                                    var date = DateTime.Now;
+                                    try
                                     {
-                                        date = date.AddYears(1);
+                                        date = DateTime.ParseExact(dateItemText, options.DateFormat, CultureInfo.CurrentCulture);
+                                        if (DateTime.Now.Month > 10 && date.Month < 3)
+                                        {
+                                            date = date.AddYears(1);
+                                        }
+                                    }
+                                    catch (FormatException)
+                                    {
+                                        dateItemText += $",{date.AddYears(1).Year}";
+                                        date = DateTime.ParseExact(dateItemText, options.DateFormat + ",yyyy", CultureInfo.CurrentCulture);
                                     }
 
                                     var chackDate = new DateOnly(date.Year, date.Month, date.Day);
