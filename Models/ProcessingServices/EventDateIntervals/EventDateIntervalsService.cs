@@ -76,13 +76,14 @@ public class EventDateIntervalsService : IGetEventDateIntervals
             holidays = _eventDateIntervalsOptions.MainHolidays.ToList();
         }
 
-        if (holidays.Max(holiday => holiday.Month) < DateTime.Today.Month)
+        var holidaysBeforeNow = holidays.Where(holiday => holiday < DateOnly.FromDateTime(DateTime.Today)).ToList();
+
+        for (var i = 0; i < holidaysBeforeNow.Count; i++)
         {
-            for (var i = 0; i < holidays.Count; i++)
-            {
-                holidays[i] = holidays[i].AddYears(1);
-            }
+            holidaysBeforeNow[i] = holidaysBeforeNow[i].AddYears(1);
         }
+
+        holidays.AddRange(holidaysBeforeNow);
 
         return holidays
             .Where(holiday => holiday >= minDate && holiday <= maxDate)
