@@ -82,7 +82,7 @@
   },
   "Quickticket": {
     "BaseSearchUrl": "https://quicktickets.ru/",
-    "BaseLinkUrl": "https://quicktickets.ru",
+    "BaseLinkUrl": "https://quicktickets.ru/",
     "DateFormat": "d MMMM, HH:mm",
     "ItemsContainerXPath": "//div[contains(@id, 'elems-list')]",
     "ItemsXPath": "//div[contains(@class, 'elem')]",
@@ -102,7 +102,7 @@
     "DateFormat": "d MMMM yyyy",
     "TimeFormat": "HH:mm",
     "ItemsXPath": "//div[contains(@class, 't778__wrapper')]",
-    "EventTitleXPath": "div[contains(@class, 't778__content')]/a/div[contains(@class, 't778__textwrapper')]/div[contains(@class, 't778__title')]/strong",
+    "EventTitleXPath": "div[contains(@class, 't778__content')]/a/div[contains(@class, 't778__textwrapper')]/div[contains(@class, 't778__title')]",
     "EventDiteTimeXPath": "div[contains(@class, 't778__content')]/a/div[contains(@class, 't778__textwrapper')]/div[contains(@class, 't778__descr t-descr')]/text()",
     "EventImageXPath": "a/div[contains(@class, 't778__imgwrapper')]/div"
   },
