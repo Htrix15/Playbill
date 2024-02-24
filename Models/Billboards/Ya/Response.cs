@@ -83,7 +83,7 @@ public class Response : IConvertToEvent<string>
             }
             catch (Exception exception)
             {
-                Console.WriteLine($"Fail convert: {item.@Event?.Title ?? "?"} Message : {exception.Message}");
+                Console.WriteLine($"Fail convert (Ya, {setting.EventType}): {item.@Event?.Title ?? "?"} Message : {exception.Message}");
             }
         }
         return resultEvent;

@@ -65,19 +65,34 @@ public class Service : ApiService<string>
                     {
                         getData = false;
                         offset += pageSize;
-                        var request = CreateRequest(searchDate, categoryId, days, offset);
-                        var responseJson = await CallRequestAsync(request);
-                        if (responseJson != null)
+                        try
                         {
-                            var respons = responseJson.ParseJson<Response>();
-                            if (respons.Paging.Total >= offset + respons.Paging.Limit)
+                            var request = CreateRequest(searchDate, categoryId, days, offset);
+                            var responseJson = await CallRequestAsync(request);
+                            if (responseJson != null)
                             {
-                                getData = true;
+                                try
+                                {
+                                    var respons = responseJson.ParseJson<Response>();
+                                    if (respons.Paging.Total >= offset + respons.Paging.Limit)
+                                    {
+                                        getData = true;
+                                    }
+                                    var events = respons.ConvertToEvents(convertToEventSetting);
+                                    result.AddRange(events);
+                                }
+                                catch (Exception ex)
+                                {
+                                    Console.WriteLine($"Fail parse Json (Ya, {searchDate}, category: {categoryId}): {ex.Message}");
+                                }
                             }
-                            var events = respons.ConvertToEvents(convertToEventSetting);
-                            result.AddRange(events);
                         }
-                    } while (getData);
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Fail call data (Ya, {searchDate}, category: {categoryId}): {ex.Message}");
+                        }
+                    }
+                    while (getData);
                 }
             }
         }

@@ -44,6 +44,10 @@ public class Service : PageParseService
                         continue;
                     }
                     var afishaItems = fullAfisha.SelectNodes(options.ItemsXPath);
+                    if (afishaItems is null)
+                    {
+                        continue;
+                    }
                     foreach (var afishaItem in afishaItems)
                     {
                         try
@@ -115,13 +119,13 @@ public class Service : PageParseService
                         }
                         catch (Exception exception)
                         {
-                            Console.WriteLine($"Fail parse items: {exception.Message}");
+                            Console.WriteLine($"Fail parse items (Quickticket): {exception.Message}");
                         }
                     }
                 }
                 catch (Exception exception)
                 {
-                    Console.WriteLine($"Fail parse page: {exception.Message}");
+                    Console.WriteLine($"Fail parse page (Quickticket): {exception.Message}");
                 }
             }
         }

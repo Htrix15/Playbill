@@ -42,6 +42,11 @@ public class Service : PageParseService
                     var dates = new List<DateTime>();
                     var dateItems = afishaItem.SelectNodes(options.EventDiteTimeXPath);
 
+                    if (dateItems is null)
+                    {
+                        continue;
+                    }
+
                     for (int i = 0; i < dateItems.Count(); i += 3)
                     {
                         var time = DateTime.ParseExact(dateItems[i + 1].InnerText.Trim().Split(" ")[1], timeFormat, CultureInfo.CurrentCulture);
@@ -62,17 +67,18 @@ public class Service : PageParseService
                     var imageItem = afishaItem.SelectSingleNode(options.EventImageXPath);
                     var imagePath = imageItem.Attributes["data-original"].Value;
 
-                    result.Add(new Event()
-                    {
-                        Billboard = BillboardType,
-                        Type = eventType,
-                        Dates = dates,
-                        Title = title,
-                        NormilizeTitle = _titleNormalizationService.TitleNormalization(title),
-                        NormilizeTitleTerms = _titleNormalizationService.CreateTitleNormalizationTerms(title),
-                        ImagePath = imagePath,
-                        Place = place,
-                        Links = new List<EventLink>()
+              
+                        result.Add(new Event()
+                        {
+                            Billboard = BillboardType,
+                            Type = eventType,
+                            Dates = dates,
+                            Title = title,
+                            NormilizeTitle = _titleNormalizationService.TitleNormalization(title),
+                            NormilizeTitleTerms = _titleNormalizationService.CreateTitleNormalizationTerms(title),
+                            ImagePath = imagePath,
+                            Place = place,
+                            Links = new List<EventLink>()
                             {
                                 new EventLink()
                                 {
@@ -80,17 +86,18 @@ public class Service : PageParseService
                                     Path = link
                                 }
                             }
-                    });
+                        });
+
                 }
                 catch (Exception exception)
                 {
-                    Console.WriteLine($"Fail parse items: {exception.Message}");
+                    Console.WriteLine($"Fail parse items (Eventhall): {exception.Message}");
                 }
             }
         }
         catch (Exception exception)
         {
-            Console.WriteLine($"Fail parse page: {exception.Message}");
+            Console.WriteLine($"Eventhall Fail parse page (Eventhall): {exception.Message}");
         }
 
         result = result.DateGrouping().ToList();

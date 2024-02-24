@@ -58,14 +58,28 @@ public class Service : ApiService<int>
                     var searchDate = eventDateInterval.StartDate;
                     do
                     {
-                        var request = CreateRequest(searchDate, categoryId);
-                        var responseJson = await CallRequestAsync(request);
-                        if (responseJson != null)
+                        try
                         {
-                            var respons = responseJson.ParseJson<Response>();
-                            convertToEventSetting.EstimatedDate = searchDate;
-                            var events = respons.ConvertToEvents(convertToEventSetting);
-                            result.AddRange(events);
+                            var request = CreateRequest(searchDate, categoryId);
+                            var responseJson = await CallRequestAsync(request);
+                            if (responseJson != null)
+                            {
+                                try
+                                {
+                                    var respons = responseJson.ParseJson<Response>();
+                                    convertToEventSetting.EstimatedDate = searchDate;
+                                    var events = respons.ConvertToEvents(convertToEventSetting);
+                                    result.AddRange(events);
+                                }
+                                catch (Exception ex)
+                                {
+                                    Console.WriteLine($"Fail parse Json (Kassir, {searchDate}, category: {categoryId}): {ex.Message}");
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Fail call data (Kassir, {searchDate}, category: {categoryId}): {ex.Message}");
                         }
                         searchDate = searchDate.AddDays(1);
                     } while (searchDate <= eventDateInterval.EndDate);

@@ -74,7 +74,7 @@ public class Response: IConvertToEvent<int>
             }
             catch (Exception exception)
             {
-                Console.WriteLine($"Fail convert: {item.Object?.Title ?? "?"} Message : {exception.Message}");
+                Console.WriteLine($"Fail convert (Kassir): {item.Object?.Title ?? "?"} Message : {exception.Message}");
             }
         }
         return resultEvent;
@@ -103,8 +103,8 @@ public class Response: IConvertToEvent<int>
     public class Address
     {
         public object? City { get; set; }
-        public string? Lng { get; set; }
-        public string? Lat { get; set; }
+        public object? Lng { get; set; }
+        public object? Lat { get; set; }
         public List<object>? Subways { get; set; }
         public string? AddressString { get; set; }
         public bool? IsNormalized { get; set; }

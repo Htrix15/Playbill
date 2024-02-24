@@ -35,12 +35,24 @@ public class Service : PageParseService
             var doc = await web.LoadFromWebAsync(baseSearchUrl);
 
             var fullAfisha = doc.DocumentNode.SelectSingleNode(options.ItemsContainerXPath);
+            if (fullAfisha is null)
+            {
+                return result;
+            }
             var afishaItems = fullAfisha.SelectNodes(options.ItemsXPath);
+            if (afishaItems is null)
+            {
+                return result;
+            }
             foreach (var afishaItem in afishaItems)
             {
                 try
                 {
                     var dateItem = afishaItem.SelectSingleNode(options.EventDateXPath);
+                    if (dateItem is null)
+                    {
+                        continue;
+                    }
                     var dateItemText = dateItem.InnerText.Trim();
                     var date = DateTime.Now;
                     try
@@ -98,13 +110,13 @@ public class Service : PageParseService
                 }
                 catch (Exception exception)
                 {
-                    Console.WriteLine($"Fail parse items: {exception.Message}");
+                    Console.WriteLine($"Fail parse items (Ticketvrn): {exception.Message}");
                 }
             }
         }
         catch (Exception exception)
         {
-            Console.WriteLine($"Fail parse page: {exception.Message}");
+            Console.WriteLine($"Fail parse page (Ticketvrn): {exception.Message}");
         }
 
         return result;
