@@ -19,7 +19,7 @@ public class Service : PageParseService
 
     public override async Task<IList<Event>> GetEventsAsync(IList<EventDateInterval> eventDateIntervals, HashSet<EventTypes> searchEventTypes)
     {
-        var options = (_options as Options);;
+        var options = (_options as Options);
 
         var baseSearchUrl = options.BaseSearchUrl;
         var place = options.Place;
@@ -97,7 +97,7 @@ public class Service : PageParseService
         }
         catch (Exception exception)
         {
-            Console.WriteLine($"Eventhall Fail parse page (Eventhall): {exception.Message}");
+            Console.WriteLine($"Fail parse page (Eventhall): {exception.Message}");
         }
 
         result = result.DateGrouping().ToList();

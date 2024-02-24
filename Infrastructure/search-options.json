@@ -7,10 +7,11 @@
         "Bezantracta", 
         "Quickticket", 
         "Eventhall", 
-        "Ticketvrn"
+        "Ticketvrn",
+        "Matreshkavrn",
     */
 
-    "SupportedBillboards": [ "Kassir", "Ya", "Bezantracta", "Quickticket", "Eventhall", "Ticketvrn" ],
+    "SupportedBillboards": [ "Kassir", "Ya", "Bezantracta", "Quickticket", "Eventhall", "Ticketvrn", "Matreshkavrn" ],
     "ExcludeBillboards": [],
     /* 
       EventTypes: 

@@ -116,5 +116,15 @@
     "EventDateXPath": "div[contains(@class, 'afisha_Data')]",
     "EventImageXPath": "div[contains(@class, 'afisha_linkImg')]/a/div[contains(@class, 'afishaImg')]/img",
     "PlaceXPath": "div[contains(@class, 'afisha_Name_zal')]"
+  },
+  "Matreshkavrn": {
+    "Place": "Матрёшка",
+    "SingleDateFormat": "d MMMM",
+    "SingleDateTimeFormat": "d MMMM HH:mm",
+    "BaseSearchUrl": "https://matreshkavrn.ru/events/",
+    "ItemsXPath": "//div[contains(@class, 'events-el')]",
+    "EventInfoXPath": "div[contains(@class, 'text-info')]/p",
+    "EventImageXPath": "a/img[contains(@class, 'events-el__img-img')]",
+    "LinkXPath": "a[contains(@class, 'events-el__link')]"
   }
 }

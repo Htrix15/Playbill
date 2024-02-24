@@ -30,6 +30,7 @@ public static class Services
             .AddTransient<IBillboardService, Billboards.Quickticket.Service>()
             .AddTransient<IBillboardService, Billboards.Eventhall.Service>()
             .AddTransient<IBillboardService, Billboards.Ticketvrn.Service>()
+            .AddTransient<IBillboardService, Billboards.Matreshkavrn.Service>()
             .AddTransient<FilterEventsService>()
             .AddTransient<EventsGroupingService>()
         ;

@@ -18,6 +18,7 @@ public static class Options
         services.Configure<Billboards.Quickticket.Options>(configuration.GetSection("Quickticket"));
         services.Configure<Billboards.Eventhall.Options>(configuration.GetSection("Eventhall"));
         services.Configure<Billboards.Ticketvrn.Options>(configuration.GetSection("Ticketvrn"));
+        services.Configure<Billboards.Matreshkavrn.Options>(configuration.GetSection("Matreshkavrn"));
         services.Configure<TitleNormalizationOptions>(configuration.GetSection("TitleNormalizationOptions"));
         services.Configure<EventDateIntervalsOptions>(configuration.GetSection("Holidays"));
     }
