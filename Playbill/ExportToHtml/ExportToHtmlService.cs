@@ -14,13 +14,15 @@ public class ExportToHtmlService
 
     public async Task ExportAync(IList<Event> events)
     {
-
-        var htmlHeader = """
+        var style = await File.ReadAllTextAsync(_options.CssFilePath);
+        var htmlHeader = $"""
             <!DOCTYPE html>
             <html>
 
             <head>
-                <link rel="stylesheet" href="style.css">
+                 <style>
+                    {style}
+                </style>
             </head>
 
             <body>
@@ -81,11 +83,6 @@ public class ExportToHtmlService
         {
             await outputFile.WriteLineAsync(html);
         }
-
-        File.Copy(_options.CssFilePath,
-            Path.Combine(_options.OutputFolder,
-            Path.GetFileName(_options.CssFilePath)),
-            true);
 
         if (_options.OpenFileAfterCreate)
         {
