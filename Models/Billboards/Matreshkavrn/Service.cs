@@ -46,12 +46,21 @@ public partial class Service : PageParseService
                     if (info is null) continue;
                     var items = info.InnerHtml.Split("<br>");
                     var title = items[0].Replace('\n',' ').Trim();
-                    var dateStr = items[1]
-                        .Replace('\n', ' ')
-                        .Replace("  "," ")
-                        .Replace("<strong>", "")
-                        .Replace("</strong>", "")
-                        .Trim();
+                    string dateStr;
+                    try
+                    {
+                        dateStr = items[1]
+                            .Replace('\n', ' ')
+                            .Replace("  ", " ")
+                            .Replace("<strong>", "")
+                            .Replace("</strong>", "")
+                            .Trim();
+                    }
+                    catch (Exception exception)
+                    {
+                        Console.WriteLine($"Date not found (Matreshkavrn, {title}): {exception.Message}");
+                        continue;
+                    }
                     var dates = new List<DateTime>();
 
                     if (TimeRange().IsMatch(dateStr))
@@ -60,25 +69,7 @@ public partial class Service : PageParseService
                         dateStr = dateStr.Remove(match.Index).Trim();
                     }
 
-                    if (!dateStr.Contains('-'))
-                    {
-                        try
-                        {
-                            dates.Add(DateTime.ParseExact(dateStr, singleDateTimeFormat, CultureInfo.CurrentCulture));
-                        }
-                        catch
-                        {
-                            try
-                            {
-                                dates.Add(DateTime.ParseExact(dateStr, singleDateFormat, CultureInfo.CurrentCulture));
-                            }
-                            catch (Exception exception)
-                            {
-                                Console.WriteLine($"Fail parse date (Matreshkavrn, {dateStr}): {exception.Message}");
-                            }
-                        }
-                    }
-                    else
+                    if (dateStr.Contains('-'))
                     {
                         try
                         {
@@ -94,6 +85,43 @@ public partial class Service : PageParseService
                         catch (Exception exception)
                         {
                             Console.WriteLine($"Fail parse date (Matreshkavrn, {dateStr}): {exception.Message}");
+                        }
+
+                       
+                    }
+                    else if (dateStr.Contains(','))
+                    {
+                        try
+                        {
+                            var days = dateStr.Split(',');
+                            var dayWithMonth = days.Last().Split(' ');
+                            var month = dayWithMonth.Last();
+                            days[days.Length -1 ] = dayWithMonth.First();
+                            foreach(var day in days)
+                            {
+                                dates.Add(DateTime.ParseExact($"{day} {month}", singleDateFormat, CultureInfo.CurrentCulture));
+                            }
+                        }
+                        catch (Exception exception)
+                        {
+                            Console.WriteLine($"Fail parse date (Matreshkavrn, {dateStr}): {exception.Message}");
+                        }
+                    } else
+                    {
+                        try
+                        {
+                            dates.Add(DateTime.ParseExact(dateStr, singleDateTimeFormat, CultureInfo.CurrentCulture));
+                        }
+                        catch
+                        {
+                            try
+                            {
+                                dates.Add(DateTime.ParseExact(dateStr, singleDateFormat, CultureInfo.CurrentCulture));
+                            }
+                            catch (Exception exception)
+                            {
+                                Console.WriteLine($"Fail parse date (Matreshkavrn, {dateStr}): {exception.Message}");
+                            }
                         }
                     }
 
