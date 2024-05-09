@@ -64,29 +64,35 @@ public class Service : PageParseService
                         .Replace("&amp;", "&");
                     var link = afishaItem.SelectSingleNode("a").Attributes["href"].Value;
 
-                    var imageItem = afishaItem.SelectSingleNode(options.EventImageXPath);
-                    var imagePath = imageItem.Attributes["data-original"].Value;
+                    var imageItems = afishaItem.SelectNodes(options.EventImageXPath);
 
-              
-                        result.Add(new Event()
+                    var imagePath = string.Empty;
+                    foreach (var imageItem in imageItems)
+                    {
+                        var imageAttribute = imageItem.Attributes["data-original"];
+                        if (imageAttribute == null) continue;
+                        imagePath = imageAttribute.Value;
+                    }
+
+                    result.Add(new Event()
+                    {
+                        Billboard = BillboardType,
+                        Type = eventType,
+                        Dates = dates,
+                        Title = title,
+                        NormilizeTitle = _titleNormalizationService.TitleNormalization(title),
+                        NormilizeTitleTerms = _titleNormalizationService.CreateTitleNormalizationTerms(title),
+                        ImagePath = imagePath,
+                        Place = place,
+                        Links = new List<EventLink>()
                         {
-                            Billboard = BillboardType,
-                            Type = eventType,
-                            Dates = dates,
-                            Title = title,
-                            NormilizeTitle = _titleNormalizationService.TitleNormalization(title),
-                            NormilizeTitleTerms = _titleNormalizationService.CreateTitleNormalizationTerms(title),
-                            ImagePath = imagePath,
-                            Place = place,
-                            Links = new List<EventLink>()
+                            new EventLink()
                             {
-                                new EventLink()
-                                {
-                                    BillboardType = BillboardType,
-                                    Path = link
-                                }
+                                BillboardType = BillboardType,
+                                Path = link
                             }
-                        });
+                        }
+                    });
 
                 }
                 catch (Exception exception)
