@@ -3,6 +3,7 @@ using Models.Billboards.Common.Extension;
 using Models.Billboards.Common.Options;
 using Models.Events;
 using Models.ProcessingServices.TitleNormalization.Common;
+using System.Net.Http.Headers;
 
 namespace Models.Billboards.Common.Service;
 
@@ -23,7 +24,10 @@ public abstract class ApiService<T> : BaseBillboardService
         {
             try
             {
-                using var response = await httpClient.GetAsync(request);
+
+                using var requestMessage = new HttpRequestMessage(HttpMethod.Get, request);
+                requestMessage.Headers.Add("x-force-cors-preflight", "1");
+                using var response = await httpClient.SendAsync(requestMessage);
                 response.EnsureSuccessStatusCode();
                 return await response.Content.ReadAsStringAsync();
             }
