@@ -1,5 +1,8 @@
 ﻿using HtmlAgilityPack;
 using Microsoft.Extensions.Options;
+using Models.Billboards.Common.Enums;
+using Models.Billboards.Common.Exceptions;
+using Models.Billboards.Common.Options;
 using Models.Billboards.Common.Service;
 using Models.Events;
 using Models.ProcessingServices.EventDateIntervals;
@@ -16,6 +19,42 @@ public class Service : PageParseService
 
     public override BillboardTypes BillboardType => BillboardTypes.Ticketvrn;
 
+    protected override List<DateTime>? GetEventDates(HtmlNode afishaItem,
+       PageParseOptions options,
+       string title = "")
+    {
+        try
+        {
+            var dateItem = afishaItem.SelectSingleNode(options.EventDateXPath);
+            if (dateItem is null)
+            {
+                return null;
+            }
+            var dateItemText = dateItem.InnerText.Trim();
+            var date = DateTime.Now;
+            try
+            {
+                date = DateTime.ParseExact(dateItemText, options.DateFormat, CultureInfo.CurrentCulture);
+                if (DateTime.Now.Month > 10 && date.Month < 3)
+                {
+                    date = date.AddYears(1);
+                }
+            }
+            catch (FormatException)
+            {
+                dateItemText += $",{date.AddYears(1).Year}";
+                date = DateTime.ParseExact(dateItemText, options.DateFormat + ",yyyy", CultureInfo.CurrentCulture);
+            }
+
+            return new List<DateTime>() { date };
+        }
+        catch (Exception exception)
+        {
+            Console.WriteLine($"Fail parse items ({BillboardType} - {title} - {PageBlock.Image}): {exception.Message}");
+            return null;
+        }
+    }
+
     public override async Task<IList<Event>> GetEventsAsync(IList<EventDateInterval> eventDateIntervals, HashSet<EventTypes>? searchEventTypes = null)
     {
         var result = new List<Event>();
@@ -26,73 +65,36 @@ public class Service : PageParseService
         }
 
         var options = (_options as Options);
-        var baseSearchUrl = options.BaseSearchUrl;
-        var baseLinkUrl = options.BaseLinkUrl;
 
         try
         {
-            var web = new HtmlWeb();
-            var doc = await web.LoadFromWebAsync(baseSearchUrl);
+            var doc = await GetBuilbordPage(options.BaseSearchUrl);
+            var fullAfisha = GetFullAfisha(doc, options.ItemsContainerXPath);
+            var afishaItems = GetAfishaItems(fullAfisha, options.ItemsXPath);
 
-            var fullAfisha = doc.DocumentNode.SelectSingleNode(options.ItemsContainerXPath);
-            if (fullAfisha is null)
-            {
-                return result;
-            }
-            var afishaItems = fullAfisha.SelectNodes(options.ItemsXPath);
-            if (afishaItems is null)
-            {
-                return result;
-            }
             foreach (var afishaItem in afishaItems)
             {
+                string? title = null;
+
                 try
                 {
-                    var dateItem = afishaItem.SelectSingleNode(options.EventDateXPath);
-                    if (dateItem is null)
-                    {
-                        continue;
-                    }
-                    var dateItemText = dateItem.InnerText.Trim();
-                    var date = DateTime.Now;
-                    try
-                    {
-                        date = DateTime.ParseExact(dateItemText, options.DateFormat, CultureInfo.CurrentCulture);
-                        if (DateTime.Now.Month > 10 && date.Month < 3)
-                        {
-                            date = date.AddYears(1);
-                        }
-                    }
-                    catch (FormatException)
-                    {
-                        dateItemText += $",{date.AddYears(1).Year}";
-                        date = DateTime.ParseExact(dateItemText, options.DateFormat + ",yyyy", CultureInfo.CurrentCulture);
-                    }
+                    title = GetTitle(afishaItem, options.EventTitleXPath);
+                    var imagePath = GetImagePath(afishaItem, options.EventImageXPath, options.BaseLinkUrl, title: title);
 
-                    var chackDate = new DateOnly(date.Year, date.Month, date.Day);
+                    if (title is null && imagePath is null) continue;
 
-                    if (!eventDateIntervals.Any(eventDateInterval => chackDate >= eventDateInterval.StartDate && chackDate <= eventDateInterval.EndDate) || date < DateTime.Now)
-                    {
-                        continue;
-                    }
+                    var dates = GetEventDates(afishaItem, options, title: title);
+                    var substandard = dates is null;
+                    dates = FilterDate(dates, eventDateIntervals);
+                    if (!substandard && dates.Count == 0) continue;
 
-                    var eventType = EventTypes.Unidentified;
-
-                    var nameItem = afishaItem.SelectSingleNode(options.EventTitleXPath);
-                    var title = nameItem.InnerText.Trim().Replace("&quot;", "\"");
-
-                    var placeItem = afishaItem.SelectSingleNode(options.PlaceXPath);
-                    var place = placeItem.InnerText.Trim();
-
-                    var imageItem = afishaItem.SelectSingleNode(options.EventImageXPath);
-                    var imagePath = baseLinkUrl + imageItem.Attributes["src"].Value;
-
-                    var link = baseLinkUrl;
+                    var place = GetPlace(afishaItem, options.PlaceXPath, title: title);
+  
                     result.Add(new Event()
                     {
                         Billboard = BillboardType,
-                        Type = eventType,
-                        Dates = new List<DateTime>() { date },
+                        Type = EventTypes.Unidentified,
+                        Dates = dates,
                         Title = title,
                         NormilizeTitle = _titleNormalizationService.TitleNormalization(title),
                         NormilizeTitleTerms = _titleNormalizationService.CreateTitleNormalizationTerms(title),
@@ -103,20 +105,21 @@ public class Service : PageParseService
                             new EventLink()
                             {
                                 BillboardType = BillboardType,
-                                Path = link
+                                Path = options.BaseLinkUrl
                             }
-                        }
+                        },
+                        Substandard = substandard
                     });
                 }
                 catch (Exception exception)
                 {
-                    Console.WriteLine($"Fail parse items (Ticketvrn): {exception.Message}");
+                    Console.WriteLine($"Fail parse items ({BillboardType} - {title}): {exception.Message}");
                 }
             }
         }
         catch (Exception exception)
         {
-            Console.WriteLine($"Fail parse page (Ticketvrn): {exception.Message}");
+            Console.WriteLine($"Fail parse page ({BillboardType}): {exception.Message}");
         }
 
         return result;

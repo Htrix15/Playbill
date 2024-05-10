@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Models.Billboards;
+using Models.Billboards.Common.Enums;
 using Models.Events;
 using Models.Search;
 using Models.Users;

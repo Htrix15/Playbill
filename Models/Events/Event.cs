@@ -1,4 +1,4 @@
-﻿using Models.Billboards;
+﻿using Models.Billboards.Common.Enums;
 
 namespace Models.Events;
 
@@ -17,5 +17,5 @@ public class Event
     public required string? Place { get; set; }
     public bool SplitPlace { get; set; }
     public required List<EventLink> Links { get; set; }
-
+    public bool Substandard { get; set; }
 }

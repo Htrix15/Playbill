@@ -1,4 +1,4 @@
-﻿namespace Models.Billboards;
+﻿namespace Models.Billboards.Common.Enums;
 
 public enum BillboardTypes
 {

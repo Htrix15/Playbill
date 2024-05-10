@@ -1,11 +1,13 @@
 ﻿using HtmlAgilityPack;
 using Microsoft.Extensions.Options;
+using Models.Billboards.Common.Enums;
+using Models.Billboards.Common.Exceptions;
 using Models.Billboards.Common.Extension;
+using Models.Billboards.Common.Options;
 using Models.Billboards.Common.Service;
 using Models.Events;
 using Models.ProcessingServices.EventDateIntervals;
 using Models.ProcessingServices.TitleNormalization.Common;
-using System;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
@@ -19,159 +21,149 @@ public partial class Service : PageParseService
 
     public override BillboardTypes BillboardType => BillboardTypes.Matreshkavrn;
 
+    protected override string? GetTitle(HtmlNode afishaItem, string eventInfoXPath)
+    {
+        try
+        {
+            var info = afishaItem.SelectSingleNode(eventInfoXPath);
+            if (info is null) return null;
+            var items = info.InnerHtml.Split("<br>");
+            return items[0].Replace('\n', ' ').Trim();
+        }
+        catch (Exception exception)
+        {
+            Console.WriteLine($"Fail parse items ({BillboardType} - {PageBlock.Title}): {exception.Message}");
+            return null;
+        }
+    }
+
+    protected override List<DateTime>? GetEventDates(HtmlNode afishaItem,
+        PageParseOptions options,
+        string title)
+    {
+        try
+        {
+            var dates = new List<DateTime>();
+
+            var singleDateFormat = (options as Options).SingleDateFormat;
+            var singleDateTimeFormat = (options as Options).SingleDateTimeFormat;
+
+            var info = afishaItem.SelectSingleNode((options as Options).EventInfoXPath);
+
+            if (info is null) return dates;
+
+            var items = info.InnerHtml.Split("<br>");
+            var dateStr = items[1]
+                    .Replace('\n', ' ')
+                    .Replace("  ", " ")
+                    .Replace("<strong>", "")
+                    .Replace("</strong>", "")
+                    .Trim();
+       
+            if (TimeRange().IsMatch(dateStr))
+            {
+                var match = TimeRange().Match(dateStr);
+                dateStr = dateStr.Remove(match.Index).Trim();
+            }
+
+            if (dateStr.Contains('-'))
+            {
+                var dateRange = dateStr.Split(' ')[0].Replace("  ", " ").Trim();
+                var dateMonth = dateStr.Split(' ')[1].Replace("  ", " ").Trim();
+                var startDay = int.Parse(dateRange.Split('-')[0].Replace("  ", " ").Trim());
+                var endDay = int.Parse(dateRange.Split('-')[1].Replace("  ", " ").Trim());
+                for (var i = startDay; i <= endDay; i++)
+                {
+                    dates.Add(DateTime.ParseExact($"{i} {dateMonth}", singleDateFormat, CultureInfo.CurrentCulture));
+                }
+            }
+            else if (dateStr.Contains(','))
+            {
+                var days = dateStr.Split(',');
+                var dayWithMonth = days.Last().Split(' ');
+                var month = dayWithMonth.Last();
+                days[days.Length - 1] = dayWithMonth.First();
+                foreach (var day in days)
+                {
+                    dates.Add(DateTime.ParseExact($"{day} {month}", singleDateFormat, CultureInfo.CurrentCulture));
+                }
+            }
+            else
+            {
+                try
+                {
+                    dates.Add(DateTime.ParseExact(dateStr, singleDateTimeFormat, CultureInfo.CurrentCulture));
+                }
+                catch
+                {
+                    dates.Add(DateTime.ParseExact(dateStr, singleDateFormat, CultureInfo.CurrentCulture));
+                }
+            }
+
+            return dates;
+        }
+        catch (Exception exception)
+        {
+            Console.WriteLine($"Fail parse items ({BillboardType} - {title} - {PageBlock.Date}): {exception.Message}");
+            return null;
+        }
+    }
+
+    protected string? GetPlace(Options options)
+    {
+        return options.Place;
+    }
+
     public override async Task<IList<Event>> GetEventsAsync(IList<EventDateInterval> eventDateIntervals, HashSet<EventTypes> searchEventTypes)
     {
         var options = _options as Options;
-
-        var baseSearchUrl = options.BaseSearchUrl;
-        var place = options.Place;
-        var singleDateFormat = options.SingleDateFormat;
-        var singleDateTimeFormat = options.SingleDateTimeFormat;
-
         var result = new List<Event>();
 
         try
         {
-            var web = new HtmlWeb();
+            var doc = await GetBuilbordPage(options.BaseSearchUrl);
+            var afishaItems = GetAfishaItems(doc.DocumentNode, options.ItemsXPath);
 
-            var doc = await web.LoadFromWebAsync(baseSearchUrl);
-
-            var afishaItems = doc.DocumentNode.SelectNodes(options.ItemsXPath);
             foreach (var afishaItem in afishaItems)
             {
-                try
-                {
-                    var info = afishaItem.SelectSingleNode(options.EventInfoXPath);
+                var title =  GetTitle(afishaItem, options.EventInfoXPath);
+                if (title is null) continue;
 
-                    if (info is null) continue;
-                    var items = info.InnerHtml.Split("<br>");
-                    var title = items[0].Replace('\n',' ').Trim();
-                    string dateStr;
-                    try
-                    {
-                        dateStr = items[1]
-                            .Replace('\n', ' ')
-                            .Replace("  ", " ")
-                            .Replace("<strong>", "")
-                            .Replace("</strong>", "")
-                            .Trim();
-                    }
-                    catch (Exception exception)
-                    {
-                        Console.WriteLine($"Date not found (Matreshkavrn, {title}): {exception.Message}");
-                        continue;
-                    }
-                    var dates = new List<DateTime>();
+                var imagePath = GetImagePath(afishaItem, options.EventImageXPath, title: title);
 
-                    if (TimeRange().IsMatch(dateStr))
-                    {
-                        var match = TimeRange().Match(dateStr);
-                        dateStr = dateStr.Remove(match.Index).Trim();
-                    }
+                var dates = GetEventDates(afishaItem, options, title: title);
+                var substandard = dates is null;
+                dates = FilterDate(dates, eventDateIntervals);
+                if (!substandard && dates.Count == 0) continue;
 
-                    if (dateStr.Contains('-'))
-                    {
-                        try
-                        {
-                            var dateRange = dateStr.Split(' ')[0].Replace("  ", " ").Trim();
-                            var dateMonth = dateStr.Split(' ')[1].Replace("  ", " ").Trim();
-                            var startDay = int.Parse(dateRange.Split('-')[0].Replace("  ", " ").Trim());
-                            var endDay = int.Parse(dateRange.Split('-')[1].Replace("  ", " ").Trim());
-                            for (var i = startDay; i <= endDay; i++)
-                            {
-                                dates.Add(DateTime.ParseExact($"{i} {dateMonth}", singleDateFormat, CultureInfo.CurrentCulture));
-                            }
-                        }
-                        catch (Exception exception)
-                        {
-                            Console.WriteLine($"Fail parse date (Matreshkavrn, {dateStr}): {exception.Message}");
-                        }
-
-                       
-                    }
-                    else if (dateStr.Contains(','))
-                    {
-                        try
-                        {
-                            var days = dateStr.Split(',');
-                            var dayWithMonth = days.Last().Split(' ');
-                            var month = dayWithMonth.Last();
-                            days[days.Length -1 ] = dayWithMonth.First();
-                            foreach(var day in days)
-                            {
-                                dates.Add(DateTime.ParseExact($"{day} {month}", singleDateFormat, CultureInfo.CurrentCulture));
-                            }
-                        }
-                        catch (Exception exception)
-                        {
-                            Console.WriteLine($"Fail parse date (Matreshkavrn, {dateStr}): {exception.Message}");
-                        }
-                    } else
-                    {
-                        try
-                        {
-                            dates.Add(DateTime.ParseExact(dateStr, singleDateTimeFormat, CultureInfo.CurrentCulture));
-                        }
-                        catch
-                        {
-                            try
-                            {
-                                dates.Add(DateTime.ParseExact(dateStr, singleDateFormat, CultureInfo.CurrentCulture));
-                            }
-                            catch (Exception exception)
-                            {
-                                Console.WriteLine($"Fail parse date (Matreshkavrn, {dateStr}): {exception.Message}");
-                            }
-                        }
-                    }
-
-                    var imageItem = afishaItem.SelectSingleNode(options.EventImageXPath);
-                    var imagePath = "";
-                    if (imageItem is not null)
-                    {
-                        imagePath = imageItem.Attributes["src"].Value;
-                    }
-
-                    var linkItem = afishaItem.SelectSingleNode(options.LinkXPath);
-                    var link = "";
-                    if (linkItem is not null)
-                    {
-                      link = linkItem.Attributes["href"].Value;
-                    } else
-                    {
-                        link = baseSearchUrl;
-                    }
+                var place = GetPlace(options);
+                var link = GetLink(afishaItem, options.LinkXPath, options.BaseSearchUrl, title: title);
                   
-
-                    result.Add(new Event()
-                    {
-                        Billboard = BillboardType,
-                        Type = EventTypes.Unidentified,
-                        Dates = dates,
-                        Title = title,
-                        NormilizeTitle = _titleNormalizationService.TitleNormalization(title),
-                        NormilizeTitleTerms = _titleNormalizationService.CreateTitleNormalizationTerms(title),
-                        ImagePath = imagePath,
-                        Place = place,
-                        Links = new List<EventLink>()
-                            {
-                                new EventLink()
-                                {
-                                    BillboardType = BillboardType,
-                                    Path = link
-                                }
-                            }
-                    });
-                }
-                catch (Exception exception)
+                result.Add(new Event()
                 {
-                    Console.WriteLine($"Fail parse items (Matreshkavrn): {exception.Message}");
-                }
+                    Billboard = BillboardType,
+                    Type = EventTypes.Unidentified,
+                    Dates = dates,
+                    Title = title,
+                    NormilizeTitle = _titleNormalizationService.TitleNormalization(title),
+                    NormilizeTitleTerms = _titleNormalizationService.CreateTitleNormalizationTerms(title),
+                    ImagePath = imagePath,
+                    Place = place,
+                    Links = new List<EventLink>()
+                        {
+                            new EventLink()
+                            {
+                                BillboardType = BillboardType,
+                                Path = link
+                            }
+                        },
+                    Substandard = substandard
+                });
             }
         }
         catch (Exception exception)
         {
-            Console.WriteLine($"Fail parse page (Matreshkavrn): {exception.Message}");
+            Console.WriteLine($"Fail parse page({BillboardType}): {exception.Message}");
         }
 
         result = result.DateGrouping().ToList();

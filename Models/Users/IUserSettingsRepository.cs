@@ -1,4 +1,4 @@
-﻿using Models.Billboards;
+﻿using Models.Billboards.Common.Enums;
 using Models.Events;
 
 namespace Models.Users;

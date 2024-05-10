@@ -1,4 +1,5 @@
-﻿using Models.Billboards.Common.Interfaces;
+﻿using Models.Billboards.Common.Enums;
+using Models.Billboards.Common.Interfaces;
 using Models.Events;
 
 namespace Models.Billboards.Kassir;

@@ -1,4 +1,5 @@
-﻿using Models.Events;
+﻿using Models.Billboards.Common.Enums;
+using Models.Events;
 using Models.ProcessingServices.EventDateIntervals;
 
 namespace Models.Billboards.Common.Interfaces;

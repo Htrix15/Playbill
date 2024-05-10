@@ -104,7 +104,8 @@
     "ItemsXPath": "//div[contains(@class, 't778__wrapper')]",
     "EventTitleXPath": "div[contains(@class, 't778__content')]/a/div[contains(@class, 't778__textwrapper')]/div[contains(@class, 't778__title')]",
     "EventDiteTimeXPath": "div[contains(@class, 't778__content')]/a/div[contains(@class, 't778__textwrapper')]/div[contains(@class, 't778__descr t-descr')]/text()",
-    "EventImageXPath": "a/div[contains(@class, 't778__imgwrapper')]/div"
+    "EventImageXPath": "a/div[contains(@class, 't778__imgwrapper')]/div",
+    "LinkXPath": "a"
   },
   "Ticketvrn": {
     "BaseSearchUrl": "http://ticketvrn.ru/",

@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Models.Billboards;
+using Models.Billboards.Common.Enums;
 using Models.Events;
 using Models.Places;
 using Models.Users;

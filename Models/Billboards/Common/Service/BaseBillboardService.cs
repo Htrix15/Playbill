@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
+using Models.Billboards.Common.Enums;
 using Models.Billboards.Common.Interfaces;
 using Models.Billboards.Common.Options;
 using Models.Events;
