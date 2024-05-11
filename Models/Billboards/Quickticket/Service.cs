@@ -1,8 +1,10 @@
 ﻿using HtmlAgilityPack;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Models.Billboards.Common.Enums;
 using Models.Billboards.Common.Exceptions;
 using Models.Billboards.Common.Extension;
+using Models.Billboards.Common.Logging;
 using Models.Billboards.Common.Options;
 using Models.Billboards.Common.Service;
 using Models.Events;
@@ -12,12 +14,10 @@ using System.Globalization;
 
 namespace Models.Billboards.Quickticket;
 
-public class Service : PageParseService
+public class Service(IOptions<Options> options, 
+    ITitleNormalization titleNormalizationService,
+    ILogger<Service> logger) : PageParseService(options, titleNormalizationService, logger)
 {
-    public Service(IOptions<Options> options, ITitleNormalization titleNormalizationService) : base(options, titleNormalizationService)
-    {
-    }
-
     public override BillboardTypes BillboardType => BillboardTypes.Quickticket;
 
     protected override List<DateTime>? GetEventDates(HtmlNode afishaItem, 
@@ -44,6 +44,7 @@ public class Service : PageParseService
                         {
                             date = date.AddYears(1);
                         }
+                        dates.Add(date);
                     }
                     catch (FormatException)
                     {
@@ -56,7 +57,10 @@ public class Service : PageParseService
         }
         catch (Exception exception)
         {
-            Console.WriteLine($"Fail parse items ({BillboardType} - {title} - {PageBlock.Date}): {exception.Message}");
+            LogHelper.LogInformation(logger,
+                BillboardType,
+                BillboardLoadingState.Processing,
+                $"Fail parse items ({title} - {PageBlock.Date}): {exception.Message}");
             return null;
         }
     }
@@ -70,12 +74,15 @@ public class Service : PageParseService
         }
         catch (Exception exception)
         {
-            Console.WriteLine($"Fail parse items ({BillboardType} - {PageBlock.Place}): {exception.Message}");
+            LogHelper.LogInformation(logger,
+                BillboardType, 
+                BillboardLoadingState.Processing,
+                $"Fail parse items ({PageBlock.Place}): {exception.Message}");
             return null;
         }
     }
 
-    public override async Task<IList<Event>> GetEventsAsync(IList<EventDateInterval> eventDateIntervals, HashSet<EventTypes>? searchEventTypes = null)
+    public override async Task<EventsResult> GetEventsAsync(IList<EventDateInterval> eventDateIntervals, HashSet<EventTypes>? searchEventTypes = null)
     {
         var options = (_options as Options);
 
@@ -106,7 +113,16 @@ public class Service : PageParseService
                         dates = FilterDate(dates, eventDateIntervals);
                         if (!substandard && dates.Count == 0) continue;
 
-                        var link = GetLink(afishaItem, options.LinkXPath, options.BaseLinkUrl, title: title);
+                        var link = GetLink(afishaItem, 
+                            options.LinkXPath, 
+                            options.BaseLinkUrl, 
+                            title: title);
+
+                        if (link is null)
+                        {
+                            substandard = true;
+                            link = options.BaseSearchUrl;
+                        }
 
                         result.Add(new Event()
                         {
@@ -132,13 +148,25 @@ public class Service : PageParseService
                 }
                 catch (Exception exception)
                 {
-                    Console.WriteLine($"Fail parse page ({BillboardType} - {eventKey}): {exception.Message}");
+                    LogHelper.LogWarning(logger,
+                        BillboardType,
+                        BillboardLoadingState.Failed,
+                        $"Fail parse page ({eventKey}): {exception.Message}");
                 }
             }
         }
 
-        result = result.DateGrouping().ToList();
-        return result;
+        return new EventsResult()
+        {
+            Result = [.. result
+            .Where(r => !r.Substandard)
+            .ToList()
+            .DateGrouping()],
+
+            SubstandardEvents = result
+            .Where(r => r.Substandard)
+            .ToList()
+        };
     }
 
 }

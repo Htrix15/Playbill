@@ -5,6 +5,8 @@ using Infrastructure;
 using Microsoft.Extensions.Configuration;
 using ConsoleApp.ExportToHtml;
 using Models.ProcessingServices.EventDateIntervals.Common.Enums;
+using Microsoft.Extensions.Logging;
+using ConsoleApp;
 
 var customServices = new List<Action<ServiceCollection>>()
 {
@@ -21,11 +23,19 @@ var customOptions = new List<Action<ServiceCollection, IConfigurationRoot>>()
     (services, configuration) => services.Configure<ExportToHtmlOptions>(configuration.GetSection("ExportToHtml"))
 };
 
+var customLogging = new List<Action<ServiceCollection>>()
+{
+     services => services.AddLogging(builder => {
+         builder.AddProvider(new ConsoleLoggerProvider());
+     })
+};
+
 using var serviceProvider = Builder
     .GetServiceCollection(
         customServices: customServices,
         customConfigurations: customConfigurations,
-        customOptions: customOptions
+        customOptions: customOptions,
+        customLogging: customLogging
     )
     .BuildServiceProvider();
 
@@ -68,6 +78,7 @@ try
 }
 catch(Exception ex)
 {
+    Console.Clear();
     Console.WriteLine("Сломалось, можно закрыть или почитать об ошибке :(");
     Console.WriteLine("Message: " + ex.Message);
     Console.WriteLine("StackTrace: " + ex.StackTrace);

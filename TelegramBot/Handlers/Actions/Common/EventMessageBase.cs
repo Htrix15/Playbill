@@ -35,6 +35,7 @@ public abstract class EventMessageBase : MessageBase
         await _messageService.SendMessageAsync(@params.ChatId, "Начат поиск событий...");
 
         var events = await _eventService.GetEvents(@params);
+        events = events.Where(e => !e.Substandard).ToList();
         var sentEventCount = 0;
         var sendingTimeControl = new Stopwatch();
         sendingTimeControl.Start();

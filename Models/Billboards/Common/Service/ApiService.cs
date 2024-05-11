@@ -1,18 +1,18 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Models.Billboards.Common.Extension;
+using Models.Billboards.Common.Logging;
 using Models.Billboards.Common.Options;
 using Models.Events;
 using Models.ProcessingServices.TitleNormalization.Common;
-using System.Net.Http.Headers;
 
 namespace Models.Billboards.Common.Service;
 
-public abstract class ApiService<T> : BaseBillboardService
+public abstract class ApiService<T>(IOptions<BaseOptions> options, 
+    ITitleNormalization titleNormalizationService,
+    ILogger<ApiService<T>> logger) :
+    BaseBillboardService(options, titleNormalizationService, logger)
 {
-    protected ApiService(IOptions<BaseOptions> options, ITitleNormalization titleNormalizationService) : base(options, titleNormalizationService)
-    {
-    }
-
     protected List<KeyValuePair<EventTypes, HashSet<TEventKey>>> EventKeys<TEventKey>(HashSet<EventTypes>? searchEventTypes) =>
         (_options as ApiOptions<TEventKey>)?.EventKeys?.FilterEventKeys(searchEventTypes).ToList() ?? new List<KeyValuePair<EventTypes, HashSet<TEventKey>>>();
    
@@ -24,7 +24,6 @@ public abstract class ApiService<T> : BaseBillboardService
         {
             try
             {
-
                 using var requestMessage = new HttpRequestMessage(HttpMethod.Get, request);
                 requestMessage.Headers.Add("x-force-cors-preflight", "1");
                 using var response = await httpClient.SendAsync(requestMessage);
@@ -34,7 +33,10 @@ public abstract class ApiService<T> : BaseBillboardService
             catch (Exception exception)
             {
                 attempt--;
-                Console.WriteLine($"Fail call: {request} Remaining attempts: {attempt} Message : {exception.Message}");
+                LogHelper.LogInformation(logger,
+                    BillboardType,
+                    BillboardLoadingState.Processing,
+                    $"Fail call: {request} Remaining attempts: {attempt} Message : {exception.Message}");
                 await Task.Delay(_options.TimeOut);
             }
         }

@@ -1,7 +1,9 @@
 ﻿using HtmlAgilityPack;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Models.Billboards.Common.Exceptions;
 using Models.Billboards.Common.Extension;
+using Models.Billboards.Common.Logging;
 using Models.Billboards.Common.Options;
 using Models.Events;
 using Models.ProcessingServices.EventDateIntervals;
@@ -9,12 +11,11 @@ using Models.ProcessingServices.TitleNormalization.Common;
 
 namespace Models.Billboards.Common.Service;
 
-public abstract class PageParseService : BaseBillboardService
+public abstract class PageParseService(IOptions<BaseOptions> options, 
+    ITitleNormalization titleNormalizationService,
+    ILogger<PageParseService> logger)
+    : BaseBillboardService(options, titleNormalizationService, logger)
 {
-    protected PageParseService(IOptions<BaseOptions> options, ITitleNormalization titleNormalizationService) : base(options, titleNormalizationService)
-    {
-    }
-
     protected List<KeyValuePair<EventTypes, HashSet<string>>> EventKeys(HashSet<EventTypes>? searchEventTypes) =>
     (_options as PageParseOptions)?.EventKeys?.FilterEventKeys(searchEventTypes).ToList() ?? new List<KeyValuePair<EventTypes, HashSet<string>>>();
 
@@ -74,8 +75,13 @@ public abstract class PageParseService : BaseBillboardService
         }
         catch (Exception exception)
         {
-            Console.WriteLine($"Fail parse items ({BillboardType} - {PageBlock.Title}): {exception.Message}");
-            return null;
+            {
+                LogHelper.LogInformation(logger,
+                    BillboardType,
+                    BillboardLoadingState.Processing,
+                    $"Fail parse page ({PageBlock.Title}): {exception.Message}");
+                return null;
+            }
         }
     }
 
@@ -90,7 +96,10 @@ public abstract class PageParseService : BaseBillboardService
         }
         catch (Exception exception)
         {
-            Console.WriteLine($"Fail parse items ({BillboardType} - {title} - {PageBlock.Place}): {exception.Message}");
+            LogHelper.LogInformation(logger,
+                BillboardType,
+                BillboardLoadingState.Processing,
+                $"Fail parse items ({title} - {PageBlock.Place}): {exception.Message}");
             return null;
         }
     }
@@ -107,7 +116,10 @@ public abstract class PageParseService : BaseBillboardService
         }
         catch (Exception exception)
         {
-            Console.WriteLine($"Fail parse items ({BillboardType} - {title} - {PageBlock.Image}): {exception.Message}");
+            LogHelper.LogInformation(logger,
+                BillboardType,
+                BillboardLoadingState.Processing,
+                $"Fail parse items ({title} - {PageBlock.Image}): {exception.Message}");
             return null;
         }
     }
@@ -120,12 +132,23 @@ public abstract class PageParseService : BaseBillboardService
         try
         {
             var linkItem = afishaItem.SelectSingleNode(linkXPath);
-            return baseLinkUrl + linkItem.Attributes["href"].Value;
+            var href = linkItem.Attributes["href"].Value;
+            if (!string.IsNullOrEmpty(baseLinkUrl) 
+                && baseLinkUrl.EndsWith('/') 
+                && href.StartsWith('/'))
+            {
+                href = href.Remove(0, 1);
+            }
+
+            return baseLinkUrl + href;
         }
         catch (Exception exception)
         {
-            Console.WriteLine($"Fail parse items ({BillboardType} - {title} - {PageBlock.Link}): {exception.Message}");
-            return baseLinkUrl;
+            LogHelper.LogInformation(logger,
+                BillboardType,
+                BillboardLoadingState.Processing,
+                $"Fail parse items ({title} - {PageBlock.Link}): {exception.Message}");
+            return null;
         }
     }
 

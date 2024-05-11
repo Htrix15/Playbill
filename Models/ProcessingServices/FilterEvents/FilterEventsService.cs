@@ -4,7 +4,7 @@ namespace Models.ProcessingServices.FilterEvents;
 
 public class FilterEventsService
 {
-    public IList<Event> FilterEvents(IList<Event> events,
+    public List<Event> FilterEvents(List<Event> events,
         bool? allPlaces,
         HashSet<string> excludePlacesTerms,
         HashSet<string> inclidePlaces,

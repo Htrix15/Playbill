@@ -7,6 +7,9 @@ namespace Models.Billboards.Common.Interfaces;
 public interface IBillboardService
 {
     /// <param name="searchEventTypes">Use null for search all types</param>
-    Task<IList<Event>> GetEventsAsync(IList<EventDateInterval> eventDateIntervals, HashSet<EventTypes>? searchEventTypes = null);
+    Task<EventsResult> GetEventsAsync(IList<EventDateInterval> eventDateIntervals, HashSet<EventTypes>? searchEventTypes = null);
     public BillboardTypes BillboardType { get; }
+
+    public void StartGetEvents();
+    public void EndGetEvents();
 }

@@ -18,4 +18,5 @@ public class Event
     public bool SplitPlace { get; set; }
     public required List<EventLink> Links { get; set; }
     public bool Substandard { get; set; }
+    public bool SubstandardByDate => Substandard && Date is null;
 }

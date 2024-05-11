@@ -46,7 +46,8 @@ public class Builder
         List<Action<ServiceCollection, IConfigurationRoot>>? customOptions = null,
         List<Action<ServiceCollection, IConfigurationRoot>>? customServicesWithOptions = null,
         List<Action<ServiceCollection>>? customDb = null,
-        List<Action<ServiceCollection>>? customMapping = null)
+        List<Action<ServiceCollection>>? customMapping = null,
+        List<Action<ServiceCollection>>? customLogging = null)
     {
         var services = Services.GetCollection();
         AddCustom(customServices, services);
@@ -66,6 +67,8 @@ public class Builder
 
         MappingProfiles.Configure(services);
         AddCustom(customMapping, services);
+
+        AddCustom(customLogging, services);
 
         return services;
     }

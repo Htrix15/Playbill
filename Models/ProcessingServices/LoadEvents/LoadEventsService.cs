@@ -8,26 +8,27 @@ using System.Collections.Concurrent;
 
 namespace Models.ProcessingServices.LoadEvents;
 
-public class LoadEventsService : BaseLoadEventsService
+public class LoadEventsService(IEnumerable<IBillboardService> billboardServices) : BaseLoadEventsService(billboardServices)
 {
-    public LoadEventsService(IEnumerable<IBillboardService> billboardServices) : base(billboardServices)
-    {
-    }
-
-    public override async Task<IList<Event>> GetEventsAsync(HashSet<BillboardTypes> supportedBillboards,
+    public override async Task<IList<EventsResult>> GetEventsAsync(HashSet<BillboardTypes> supportedBillboards,
         IList<EventDateInterval> eventDateIntervals, 
         HashSet<EventTypes> searchEventTypes
         )
     {
-        var eventsBug = new ConcurrentBag<IList<Event>>();
+        var eventsBug = new ConcurrentBag<EventsResult>();
 
         var loaders = _billboardService
-            .FilterSupportedBillboards(supportedBillboards)
-            .Select(async service => eventsBug.Add(await service.GetEventsAsync(eventDateIntervals, searchEventTypes)));
+         .FilterSupportedBillboards(supportedBillboards)
+         .Select(service => Task.Run(async () =>
+         {
+             service.StartGetEvents();
+             eventsBug.Add(await service.GetEventsAsync(eventDateIntervals, searchEventTypes));
+             service.EndGetEvents();
+         }));
 
         await Task.WhenAll(loaders.ToArray());
 
-        var result = eventsBug.SelectMany(events => events).ToList();
+        var result = eventsBug.ToList();
 
         return result;
     }

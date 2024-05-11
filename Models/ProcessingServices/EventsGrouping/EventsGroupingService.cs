@@ -186,7 +186,7 @@ public class EventsGroupingService
         });
     }
 
-    public IList<Event> EventsGrouping(IList<Event> events)
+    public List<Event> EventsGrouping(List<Event> events)
     {
         var _events = EventDatePreparation(events.ToList());
 

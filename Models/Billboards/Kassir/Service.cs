@@ -1,6 +1,8 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Models.Billboards.Common.Enums;
 using Models.Billboards.Common.Extension;
+using Models.Billboards.Common.Logging;
 using Models.Billboards.Common.Service;
 using Models.Events;
 using Models.ProcessingServices.EventDateIntervals;
@@ -8,12 +10,10 @@ using Models.ProcessingServices.TitleNormalization.Common;
 
 namespace Models.Billboards.Kassir;
 
-public class Service : ApiService<int>
+public class Service(IOptions<Options> options, 
+    ITitleNormalization titleNormalizationService,
+    ILogger<Service> logger) : ApiService<int>(options, titleNormalizationService, logger)
 {
-    public Service(IOptions<Options> options, ITitleNormalization titleNormalizationService) : base(options, titleNormalizationService)
-    {
-    }
-
     public override BillboardTypes BillboardType => BillboardTypes.Kassir;
 
     private string CreateRequest(DateOnly searchDate, int categoryId)
@@ -34,7 +34,7 @@ public class Service : ApiService<int>
         return options.BaseSearchUrl + string.Join('&', keys);
     }
 
-    public override async Task<IList<Event>> GetEventsAsync(IList<EventDateInterval> eventDateIntervals, HashSet<EventTypes>? searchEventTypes = null)
+    public override async Task<EventsResult> GetEventsAsync(IList<EventDateInterval> eventDateIntervals, HashSet<EventTypes>? searchEventTypes = null)
     {
         var result = new List<Event>();
 
@@ -48,6 +48,14 @@ public class Service : ApiService<int>
             TimeOffset = options.TimeOffset
         };
         var filteredEventKeys = EventKeys<int>(searchEventTypes);
+
+        var stepCount = eventDateIntervals.Count * filteredEventKeys.Sum(f => f.Value.Count);
+        var step = 1;
+        LogHelper.LogInformation(logger,
+                               BillboardType,
+                               BillboardLoadingState.Processing, 
+                               stepCount: stepCount,
+                               step: step);
 
         foreach (var eventKey in filteredEventKeys)
         {
@@ -71,18 +79,32 @@ public class Service : ApiService<int>
                                     var events = respons.ConvertToEvents(convertToEventSetting);
                                     result.AddRange(events);
                                 }
-                                catch (Exception ex)
+                                catch (Exception exception)
                                 {
-                                    Console.WriteLine($"Fail parse Json (Kassir, {searchDate}, category: {categoryId}): {ex.Message}");
+                                    LogHelper.LogWarning(logger,
+                                        BillboardType,
+                                        BillboardLoadingState.Processing,
+                                        $"Fail parse Json ({BillboardType}, {searchDate}, category: {categoryId}): {exception.Message}");
                                 }
                             }
                         }
-                        catch (Exception ex)
+                        catch (Exception exception)
                         {
-                            Console.WriteLine($"Fail call data (Kassir, {searchDate}, category: {categoryId}): {ex.Message}");
+                            LogHelper.LogWarning(logger,
+                                BillboardType,
+                                BillboardLoadingState.Processing,
+                                $"Fail call data ({BillboardType}, {searchDate}, category: {categoryId}): {exception.Message}");
                         }
-                        searchDate = searchDate.AddDays(1);
+                        searchDate = searchDate.AddDays(1);  
                     } while (searchDate <= eventDateInterval.EndDate);
+
+                    LogHelper.LogProgressInformation(logger,
+                        BillboardType,
+                        stepCount: stepCount,
+                        step: step,
+                        progressStepLoging: 1);
+
+                    step++;
                 }
             }
         }
@@ -95,6 +117,9 @@ public class Service : ApiService<int>
             @event.NormilizeTitleTerms = _titleNormalizationService.CreateTitleNormalizationTerms(@event.Title);
         });
 
-        return result;
+        return new EventsResult()
+        {
+            Result = result,
+        };
     }
 }

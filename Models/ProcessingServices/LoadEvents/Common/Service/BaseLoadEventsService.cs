@@ -13,7 +13,7 @@ public abstract class BaseLoadEventsService
         _billboardService = billboardService;
     }
 
-    public abstract Task<IList<Event>> GetEventsAsync(HashSet<BillboardTypes> supportedBillboards, 
+    public abstract Task<IList<EventsResult>> GetEventsAsync(HashSet<BillboardTypes> supportedBillboards, 
         IList<EventDateInterval> eventDateIntervals, 
         HashSet<EventTypes> searchEventTypes);
 }

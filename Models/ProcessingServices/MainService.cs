@@ -10,34 +10,23 @@ using Models.Places;
 
 namespace Models.ProcessingServices;
 
-public class MainService
+public class MainService(IOptions<SearchOptions> defaultOptions,
+    IMapper mapper,
+    EventDateIntervalsService eventDateIntervalsService,
+    LoadEventsService loadEventsService,
+    EventsGroupingService eventsGroupingService,
+    FilterEventsService filterEventsService,
+    PlacesService placesService)
 {
-    private readonly SearchOptions _searchOptions;
+    private readonly SearchOptions _searchOptions = defaultOptions.Value;
 
-    private readonly IMapper _mapper;
+    private readonly IMapper _mapper = mapper;
 
-    private readonly EventDateIntervalsService _eventDateIntervalsService;
-    private readonly LoadEventsService _loadEventsService;
-    private readonly EventsGroupingService _eventsGroupingService;
-    private readonly FilterEventsService _filterEventsService;
-    private readonly PlacesService _placesService;
-
-    public MainService(IOptions<SearchOptions> defaultOptions, 
-        IMapper mapper,
-        EventDateIntervalsService eventDateIntervalsService,
-        LoadEventsService loadEventsService,
-        EventsGroupingService eventsGroupingService,
-        FilterEventsService filterEventsService,
-        PlacesService placesService)
-    {
-        _searchOptions = defaultOptions.Value;
-        _mapper = mapper;
-        _eventDateIntervalsService = eventDateIntervalsService;
-        _loadEventsService = loadEventsService;
-        _eventsGroupingService = eventsGroupingService;
-        _filterEventsService = filterEventsService;
-        _placesService = placesService;
-    }
+    private readonly EventDateIntervalsService _eventDateIntervalsService = eventDateIntervalsService;
+    private readonly LoadEventsService _loadEventsService = loadEventsService;
+    private readonly EventsGroupingService _eventsGroupingService = eventsGroupingService;
+    private readonly FilterEventsService _filterEventsService = filterEventsService;
+    private readonly PlacesService _placesService = placesService;
 
     private SearchOptions OverlayOptions(SearchOptions userSearchOptions)
     {
@@ -69,11 +58,15 @@ public class MainService
             userSearchOptions.EndDate,
             userSearchOptions.AddHolidays ?? false);
 
-        var events = await _loadEventsService.GetEventsAsync(userSearchOptions.SupportedBillboards!, 
+        var eventResults = await _loadEventsService.GetEventsAsync(userSearchOptions.SupportedBillboards!, 
             intervals,
             userSearchOptions.SearchEventTypes!);
 
+        var events = eventResults.SelectMany(e => e.Result).ToList();
+        var substandardEvents = eventResults.SelectMany(e => e.SubstandardEvents).ToList();
+
         _placesService.ReplacePlaceToSynonyms(events, placesSynonyms);
+        _placesService.ReplacePlaceToSynonyms(substandardEvents, placesSynonyms);
 
         events = _filterEventsService.FilterEvents(events, userSearchOptions.AllPlaces,
             userSearchOptions?.ExcludePlacesTerms ?? new HashSet<string>(),
@@ -83,6 +76,8 @@ public class MainService
         events = _eventsGroupingService.EventsGrouping(events);
 
         events = events.Where(@event => intervals.Any(interval => DateOnly.FromDateTime(@event.Date.Value) >= interval.StartDate && DateOnly.FromDateTime(@event.Date.Value) <= interval.EndDate)).ToList();
+
+        events.AddRange(substandardEvents);
 
         await _placesService.AddNewPlaceAsync(places, events);
 

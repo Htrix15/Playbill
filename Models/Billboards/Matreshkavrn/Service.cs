@@ -1,8 +1,10 @@
 ﻿using HtmlAgilityPack;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Models.Billboards.Common.Enums;
 using Models.Billboards.Common.Exceptions;
 using Models.Billboards.Common.Extension;
+using Models.Billboards.Common.Logging;
 using Models.Billboards.Common.Options;
 using Models.Billboards.Common.Service;
 using Models.Events;
@@ -13,12 +15,10 @@ using System.Text.RegularExpressions;
 
 namespace Models.Billboards.Matreshkavrn;
 
-public partial class Service : PageParseService
+public partial class Service(IOptions<Options> options,
+    ITitleNormalization titleNormalizationService,
+    ILogger<Service> logger) : PageParseService(options, titleNormalizationService, logger)
 {
-    public Service(IOptions<Options> options, ITitleNormalization titleNormalizationService) : base(options, titleNormalizationService)
-    {
-    }
-
     public override BillboardTypes BillboardType => BillboardTypes.Matreshkavrn;
 
     protected override string? GetTitle(HtmlNode afishaItem, string eventInfoXPath)
@@ -32,7 +32,10 @@ public partial class Service : PageParseService
         }
         catch (Exception exception)
         {
-            Console.WriteLine($"Fail parse items ({BillboardType} - {PageBlock.Title}): {exception.Message}");
+            LogHelper.LogInformation(logger,
+                BillboardType,
+                BillboardLoadingState.Processing,
+                $"Fail parse items ({PageBlock.Title}): {exception.Message}");
             return null;
         }
     }
@@ -104,7 +107,10 @@ public partial class Service : PageParseService
         }
         catch (Exception exception)
         {
-            Console.WriteLine($"Fail parse items ({BillboardType} - {title} - {PageBlock.Date}): {exception.Message}");
+            LogHelper.LogInformation(logger,
+                BillboardType, 
+                BillboardLoadingState.Processing,
+                $"Fail parse items ({title} - {PageBlock.Date}): {exception.Message}");
             return null;
         }
     }
@@ -114,10 +120,15 @@ public partial class Service : PageParseService
         return options.Place;
     }
 
-    public override async Task<IList<Event>> GetEventsAsync(IList<EventDateInterval> eventDateIntervals, HashSet<EventTypes> searchEventTypes)
+    public override async Task<EventsResult> GetEventsAsync(IList<EventDateInterval> eventDateIntervals, HashSet<EventTypes> searchEventTypes)
     {
         var options = _options as Options;
         var result = new List<Event>();
+
+        if (!searchEventTypes.Contains(EventTypes.Unidentified))
+        {
+            return new EventsResult();
+        }
 
         try
         {
@@ -137,8 +148,16 @@ public partial class Service : PageParseService
                 if (!substandard && dates.Count == 0) continue;
 
                 var place = GetPlace(options);
-                var link = GetLink(afishaItem, options.LinkXPath, options.BaseSearchUrl, title: title);
-                  
+                var link = GetLink(afishaItem, 
+                    options.LinkXPath, 
+                    title: title);
+                
+                if (link is null)
+                {
+                    substandard = true;
+                    link = options.BaseSearchUrl;
+                }
+
                 result.Add(new Event()
                 {
                     Billboard = BillboardType,
@@ -163,12 +182,23 @@ public partial class Service : PageParseService
         }
         catch (Exception exception)
         {
-            Console.WriteLine($"Fail parse page({BillboardType}): {exception.Message}");
+            LogHelper.LogWarning(logger,
+                BillboardType,
+                BillboardLoadingState.Failed,
+                $"Fail parse page: {exception.Message}");
         }
 
-        result = result.DateGrouping().ToList();
+        return new EventsResult()
+        {
+            Result = [.. result
+            .Where(r => !r.Substandard)
+            .ToList()
+            .DateGrouping()],
 
-        return result;
+            SubstandardEvents = result
+            .Where(r => r.Substandard)
+            .ToList()
+        };
     }
 
     [GeneratedRegex("\\d{1,2}:\\d{2}.{1,}\\d{1,2}:\\d{2}")]
