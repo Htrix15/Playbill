@@ -51,11 +51,11 @@ public partial class Service(IOptions<Options> options,
 
             var infos = afishaItem.SelectNodes((options as Options).EventInfoXPath);
 
-            if (infos.Count == 0) return dates;
+            if (infos.Count == 0) throw new Exception("Info not found");
 
             var dateItem = infos.SelectMany(i => i.InnerHtml.Split("/n")).FirstOrDefault(i => !string.Equals(title, i, StringComparison.CurrentCultureIgnoreCase));
 
-            if (dateItem == null) return dates;
+            if (dateItem == null) throw new Exception("Dates not found");
 
             var dateStr = dateItem
                     .Split("<br>")
