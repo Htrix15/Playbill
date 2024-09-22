@@ -83,7 +83,7 @@
   "Quickticket": {
     "BaseSearchUrl": "https://quicktickets.ru/",
     "BaseLinkUrl": "https://quicktickets.ru/",
-    "DateFormat": "d MMMM, HH:mm",
+    "DateFormat": "dd MMMM HH:mm",
     "ItemsContainerXPath": "//div[contains(@id, 'elems-list')]",
     "ItemsXPath": "//div[contains(@class, 'elem')]",
     "EventTitleXPath": "div[contains(@class, 'c')]/h3/a/span[contains(@class, 'underline')]",
