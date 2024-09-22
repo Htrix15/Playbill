@@ -24,7 +24,7 @@ public class Service(IOptions<Options> options,
         {
             $"{options.QueryKeys?[QueryKeys.PageSize]}={options.QueryKeysConstants?[QueryKeys.PageSize]}",
             $"{options.QueryKeys?[QueryKeys.CurrentPage]}={offset}",
-            $"{options.QueryKeys?[QueryKeys.DateFrom]}={searchDate.ToString(options.DateFormat)}",
+            $"{options.QueryKeys?[QueryKeys.DateFrom]}={searchDate.ToString(options.DateFormats.First())}",
             $"{options.QueryKeys?[QueryKeys.DateEnd]}={days}",
             $"{options.QueryKeys?[QueryKeys.Domain]}={options.QueryKeysConstants?[QueryKeys.Domain]}",
         };

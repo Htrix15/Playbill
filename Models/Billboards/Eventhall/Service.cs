@@ -28,9 +28,6 @@ public class Service(IOptions<Options> options,
         {
             var dates = new List<DateTime>();
 
-            var dateFormat = (options as Options).DateFormat;
-            var timeFormat = (options as Options).TimeFormat;
-
             var dateItems = afishaItem.SelectNodes((options as Options).EventDiteTimeXPath);
 
             if (dateItems is null)
@@ -40,9 +37,8 @@ public class Service(IOptions<Options> options,
 
             for (int i = 0; i < dateItems.Count(); i += 3)
             {
-                var time = DateTime.ParseExact(dateItems[i + 1].InnerText.Trim().Split(" ")[1], timeFormat, CultureInfo.CurrentCulture);
-                var date = DateTime.ParseExact(dateItems[i].InnerText.Trim().Replace(",", ""), dateFormat, CultureInfo.CurrentCulture).AddHours(time.Hour).AddMinutes(time.Minute);
-                dates.Add(date);
+                dates.Add(ParseDate($"{dateItems[i].InnerText.Trim().Replace(",", "")} {dateItems[i + 1].InnerText.Trim().Split(" ")[1]}",
+                    options.DateFormats));
             }
             return dates;
         }

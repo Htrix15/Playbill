@@ -9,6 +9,7 @@ using Models.Billboards.Common.Options;
 using Models.Billboards.Common.Service;
 using Models.Events;
 using Models.ProcessingServices.EventDateIntervals;
+using Models.ProcessingServices.EventDateIntervals.Common;
 using Models.ProcessingServices.TitleNormalization.Common;
 using System.Globalization;
 using System.Text.RegularExpressions;
@@ -48,15 +49,17 @@ public partial class Service(IOptions<Options> options,
         {
             var dates = new List<DateTime>();
 
-            var singleDateFormat = (options as Options).SingleDateFormat;
-            var singleDateTimeFormat = (options as Options).SingleDateTimeFormat;
+            var infos = afishaItem.SelectNodes((options as Options).EventInfoXPath);
 
-            var info = afishaItem.SelectSingleNode((options as Options).EventInfoXPath);
+            if (infos.Count == 0) return dates;
 
-            if (info is null) return dates;
+            var dateItem = infos.SelectMany(i => i.InnerHtml.Split("/n")).FirstOrDefault(i => !string.Equals(title, i, StringComparison.CurrentCultureIgnoreCase));
 
-            var items = info.InnerHtml.Split("<br>");
-            var dateStr = items[1]
+            if (dateItem == null) return dates;
+
+            var dateStr = dateItem
+                    .Split("<br>")
+                    .First(i => !string.Equals(title, i, StringComparison.CurrentCultureIgnoreCase))
                     .Replace('\n', ' ')
                     .Replace("  ", " ")
                     .Replace("<strong>", "")
@@ -77,7 +80,7 @@ public partial class Service(IOptions<Options> options,
                 var endDay = int.Parse(dateRange.Split('-')[1].Replace("  ", " ").Trim());
                 for (var i = startDay; i <= endDay; i++)
                 {
-                    dates.Add(DateTime.ParseExact($"{i} {dateMonth}", singleDateFormat, CultureInfo.CurrentCulture));
+                    dates.Add(ParseDate($"{i} {dateMonth}", options.DateFormats));
                 }
             }
             else if (dateStr.Contains(','))
@@ -88,19 +91,12 @@ public partial class Service(IOptions<Options> options,
                 days[days.Length - 1] = dayWithMonth.First();
                 foreach (var day in days)
                 {
-                    dates.Add(DateTime.ParseExact($"{day} {month}", singleDateFormat, CultureInfo.CurrentCulture));
+                    dates.Add(ParseDate($"{day} {month}", options.DateFormats));
                 }
             }
             else
             {
-                try
-                {
-                    dates.Add(DateTime.ParseExact(dateStr, singleDateTimeFormat, CultureInfo.CurrentCulture));
-                }
-                catch
-                {
-                    dates.Add(DateTime.ParseExact(dateStr, singleDateFormat, CultureInfo.CurrentCulture));
-                }
+                dates.Add(ParseDate(dateStr, options.DateFormats));
             }
 
             return dates;

@@ -5,7 +5,7 @@
     "TimeOut": 3000,
     "TryCount": 3,
     "TimeOffset": -3,
-    "DateFormat": "dd.MM.yyyy",
+    "DateFormats": [ "dd.MM.yyyy" ],
     "EventKeys": {
       "Theater": [ 3009 ],
       "Concert": [ 3000 ],
@@ -39,7 +39,7 @@
     "BaseLinkUrl": "https://afisha.yandex.ru",
     "TimeOut": 3000,
     "TryCount": 3,
-    "DateFormat": "yyyy-MM-dd",
+    "DateFormats": [ "yyyy-MM-dd" ],
     "EventKeys": {
       "Theater": [ "theatre" ],
       "Concert": [ "concert" ],
@@ -67,7 +67,7 @@
   "Bezantracta": {
     "BaseSearchUrl": "https://vrn.bezantrakta.ru/",
     "BaseLinkUrl": "https://vrn.bezantrakta.ru",
-    "DateFormat": "dd MMMM HH:mm",
+    "DateFormats": [ "dd MMMM HH:mm" ],
     "ItemsContainerXPath": "//div[contains(@class, 'blockAfisha')]",
     "ItemsXPath": "//div[contains(@class, 'afisha_unit')]",
     "EventTitleXPath": "div[contains(@class, 'afisha_Name')]",
@@ -83,7 +83,7 @@
   "Quickticket": {
     "BaseSearchUrl": "https://quicktickets.ru/",
     "BaseLinkUrl": "https://quicktickets.ru/",
-    "DateFormat": "dd MMMM HH:mm",
+    "DateFormats": [ "dd MMMM HH:mm" ],
     "ItemsContainerXPath": "//div[contains(@id, 'elems-list')]",
     "ItemsXPath": "//div[contains(@class, 'elem')]",
     "EventTitleXPath": "div[contains(@class, 'c')]/h3/a/span[contains(@class, 'underline')]",
@@ -99,8 +99,7 @@
   "Eventhall": {
     "Place": "МТС Live Холл",
     "BaseSearchUrl": "https://vrn-live-hall.mts.ru/",
-    "DateFormat": "d MMMM yyyy",
-    "TimeFormat": "HH:mm",
+    "DateFormats": [ "d MMMM yyyy HH:mm" ],
     "ItemsXPath": "//div[contains(@class, 't778__wrapper')]",
     "EventTitleXPath": "div[contains(@class, 't778__content')]/a/div[contains(@class, 't778__textwrapper')]/div[contains(@class, 't778__title')]",
     "EventDiteTimeXPath": "div[contains(@class, 't778__content')]/a/div[contains(@class, 't778__textwrapper')]/div[contains(@class, 't778__descr t-descr')]/text()",
@@ -110,7 +109,7 @@
   "Ticketvrn": {
     "BaseSearchUrl": "http://ticketvrn.ru/",
     "BaseLinkUrl": "http://ticketvrn.ru",
-    "DateFormat": "dd MMMM HH:mm",
+    "DateFormats": [ "dd MMMM HH:mm" ],
     "ItemsContainerXPath": "//div[contains(@class, 'blockAfisha')]",
     "ItemsXPath": "//div[contains(@class, 'afisha_unit')]",
     "EventTitleXPath": "div[contains(@class, 'afisha_Name')]",
@@ -120,8 +119,7 @@
   },
   "Matreshkavrn": {
     "Place": "Матрёшка",
-    "SingleDateFormat": "d MMMM",
-    "SingleDateTimeFormat": "d MMMM HH:mm",
+    "DateFormats": [ "d MMMM", "d MMMM HH:mm", "d MMMM yyyy" ],
     "BaseSearchUrl": "https://matreshkavrn.ru/events/",
     "ItemsXPath": "//div[contains(@class, 'events-el')]",
     "EventInfoXPath": "div[contains(@class, 'text-info')]/p",

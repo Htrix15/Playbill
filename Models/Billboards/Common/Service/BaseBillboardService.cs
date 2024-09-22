@@ -7,6 +7,7 @@ using Models.Billboards.Common.Options;
 using Models.Events;
 using Models.ProcessingServices.EventDateIntervals;
 using Models.ProcessingServices.TitleNormalization.Common;
+using System.Globalization;
 
 
 namespace Models.Billboards.Common.Service;
@@ -29,5 +30,32 @@ public abstract class BaseBillboardService(IOptions<BaseOptions> options,
     public void EndGetEvents()
     {
         LogHelper.LogInformation(logger, BillboardType, BillboardLoadingState.End);
+    }
+
+    protected DateTime ParseDate(string dateItemText, List<string> formats, bool tryAddYear = false)
+    {
+        foreach (var df in formats)
+        {
+            try
+            {
+                var date = DateTime.ParseExact(dateItemText, df, CultureInfo.CurrentCulture);
+                if (DateTime.Now.Month > 10 && date.Month < 3)
+                {
+                    date = date.AddYears(1);
+                }
+
+                return date;
+            }
+            catch { }
+        }
+
+        if (tryAddYear)
+        {
+            return ParseDate($"{dateItemText},{DateTime.Now.AddYears(1).Year}", 
+                formats.Select(f => $"{f},yyyy").ToList(), 
+                false);
+        }
+
+        throw new Exception($"Fail parse date {dateItemText}");
     }
 }

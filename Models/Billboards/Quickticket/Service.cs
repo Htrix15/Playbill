@@ -36,21 +36,7 @@ public class Service(IOptions<Options> options,
                 {
                     if (dateItem == null) { continue; }
                     var dateItemText = dateItem.InnerText.Trim();
-                    var date = DateTime.Now;
-                    try
-                    {
-                        date = DateTime.ParseExact(dateItemText, options.DateFormat, CultureInfo.CurrentCulture);
-                        if (DateTime.Now.Month > 10 && date.Month < 3)
-                        {
-                            date = date.AddYears(1);
-                        }
-                        dates.Add(date);
-                    }
-                    catch (FormatException)
-                    {
-                        dateItemText += $",{date.AddYears(1).Year}";
-                        dates.Add(DateTime.ParseExact(dateItemText, options.DateFormat + ",yyyy", CultureInfo.CurrentCulture));
-                    }
+                    return [ParseDate(dateItemText, options.DateFormats, tryAddYear: true)];
                 }
             }
             return dates;
